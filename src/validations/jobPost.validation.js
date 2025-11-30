@@ -9,8 +9,8 @@ const objectId = (label = "id") =>
     "string.hex": "{#label} must contain only hexadecimal characters",
   });
 
-  // const dateFormate = "/^(?:(?:31-(?:01|03|05|07|08|10|12))|(?:29|30-(?:01|03|04|05|06|07|08|09|10|11|12))|(?:29-02-(?:\d\d(?:0[48]|[2468][048]|[13579][26])|(?:0[48]|[2468][048]|[13579][26])00))|(?:0[1-9]|1\d|2[0-8]-(?:01|02|03|04|05|06|07|08|09|10|11|12)))-\d{4}$/"
-  const dateFormate = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
+// const dateFormate = "/^(?:(?:31-(?:01|03|05|07|08|10|12))|(?:29|30-(?:01|03|04|05|06|07|08|09|10|11|12))|(?:29-02-(?:\d\d(?:0[48]|[2468][048]|[13579][26])|(?:0[48]|[2468][048]|[13579][26])00))|(?:0[1-9]|1\d|2[0-8]-(?:01|02|03|04|05|06|07|08|09|10|11|12)))-\d{4}$/"
+const dateFormate = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
 
 
 
@@ -149,6 +149,44 @@ const getAllJobPost = {
     sortField: Joi.string().valid("createdAt", "salary", "jobStartDate", "jobEndDate", "title").default("createdAt"),
     sortOrder: Joi.string().valid("asc", "desc").default("desc"),
     isActive: Joi.boolean().optional(),
+  }),
+};
+
+const getOnlyAppliedJobPosts = {
+  query: Joi.object().keys({
+    // recruiterId: objectId("recruiterId").required(),
+
+    search: Joi.string().trim().lowercase().allow("", null),
+
+    status: Joi.string()
+      .valid(...Object.values(APPLICATION_STATUS))
+      .allow(null, ""),
+
+    city: Joi.string().trim().allow("", null),
+    state: Joi.string().trim().allow("", null),
+    country: Joi.string().trim().allow("", null),
+
+    startDate: Joi.string()
+      .trim()
+      .pattern(dateFormate)
+      .allow(null, "")
+      .messages({
+        "string.pattern.base": "startDate must be in YYYY-MM-DD format only",
+      }),
+
+    endDate: Joi.string()
+      .trim()
+      .pattern(dateFormate)
+      .allow(null, "")
+      .messages({
+        "string.pattern.base": "endDate must be in YYYY-MM-DD format only",
+      }),
+
+    page: Joi.number().min(1).default(1),
+    limit: Joi.number().min(1).max(100).default(10),
+
+    sortField: Joi.string().valid("createdAt", "salary", "jobStartDate", "jobEndDate", "title").default("createdAt"),
+    sortOrder: Joi.string().valid("asc", "desc").default("desc"),
   }),
 };
 
@@ -439,10 +477,21 @@ const getApplicationDetail = {
   }),
 };
 
+const getJobpostOverviewCount = {
+  query: Joi.object().keys({
+    applicantId: objectId().optional(),
+    recruiterId: objectId().optional(),
+  }).or("applicantId", "recruiterId")
+    .messages({
+      "object.missing": "Either applicantId or recruiterId is required in query params.",
+    }),
+};
+
 module.exports = {
   addJobPost,
   // editJobPost,
   getAllJobPost,
+  getOnlyAppliedJobPosts,
   getJobPostDetails,
   applyJob,
   updateApplicationStatus,
@@ -458,4 +507,5 @@ module.exports = {
   viewAllExpriedJobs,
   completeJobByEmployee,
   verifiedJobByHospital,
+  getJobpostOverviewCount,
 };

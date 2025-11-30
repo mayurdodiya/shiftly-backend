@@ -1,10 +1,11 @@
 const message = require("../json/message.json");
 const { JobPostModel, UserModel, SettingModel, JobApplicationModel } = require("../models");
 const apiResponse = require("../utils/api.response");
-const logger = require("../config/logger");
+const mongoose = require("mongoose");
+const { Types } = mongoose;
 const moment = require("moment");
 const { getPagination, pagingData } = require("../utils/utils");
-const { POST_STATUS, APPLICATION_STATUS } = require("../utils/constant");
+const { APPLICATION_STATUS } = require("../utils/constant");
 
 module.exports = {
   // Job post ----------------------------------
@@ -129,6 +130,101 @@ module.exports = {
     }
   },
 
+  // list of applicant applied jobs only for hospital
+  getOnlyAppliedJobPosts: async (req, res) => {
+    try {
+      const { /* recruiterId, */ search, status, city, state, startDate, endDate, page, limit, sortField, sortOrder } = req.query;
+      const recruiterId = req.user._id;
+
+      const { skip, limit: pageLimit } = getPagination(page, limit);
+
+      let filterArr = [{ deletedAt: null }, { isActive: true }];
+
+      if (search) {
+        const reg = new RegExp(search, "i");
+        filterArr.push({
+          $or: [
+            { title: reg },
+            { description: reg },
+            { skills: { $in: [reg] } },
+            { "location.city": reg },
+            { "location.state": reg }
+          ]
+        });
+      }
+
+      if (status) filterArr.push({ status });
+      if (recruiterId) filterArr.push({ recruiterId: new Types.ObjectId(recruiterId) });
+      if (city) filterArr.push({ "location.city": city });
+      if (state) filterArr.push({ "location.state": state });
+      if (startDate) filterArr.push({ jobStartDate: { $gte: new Date(startDate) } });
+      if (endDate) filterArr.push({ jobStartDate: { $lte: new Date(endDate) } });
+
+      const filterQuery = filterArr.length > 0 ? { $and: filterArr } : {};
+
+      const pipeline = [
+        { $match: filterQuery },
+        {
+          $lookup: {
+            from: "jobApplication",
+            localField: "_id",
+            foreignField: "jobPostId",
+            as: "applications"
+          }
+        },
+        { $match: { "applications.0": { $exists: true } } }, // only posts with at least one application
+        {
+          $lookup: {
+            from: "users",
+            localField: "recruiterId",
+            foreignField: "_id",
+            as: "recruiter"
+          }
+        },
+        { $unwind: "$recruiter" },
+        { $sort: { [sortField || "createdAt"]: sortOrder === "asc" ? 1 : -1 } },
+        { $skip: skip },
+        { $limit: pageLimit }
+      ];
+
+      const data = await JobPostModel.aggregate(pipeline);
+
+      const countPipeline = [
+        { $match: filterQuery },
+        {
+          $lookup: {
+            from: "jobApplication",
+            localField: "_id",
+            foreignField: "jobPostId",
+            as: "applications"
+          }
+        },
+        { $match: { "applications.0": { $exists: true } } },
+        { $count: "total" }
+      ];
+
+      const countResult = await JobPostModel.aggregate(countPipeline);
+      const totalCount = countResult.length > 0 ? countResult[0].total : 0;
+
+      const response = pagingData({
+        data,
+        total: totalCount,
+        page,
+        limit: pageLimit,
+      });
+
+      return apiResponse.OK({
+        res,
+        message: `Job Posts fetched successfully`,
+        data: response,
+      })
+
+    } catch (err) {
+      console.log("Error fetching job posts", err);
+      return apiResponse.CATCH_ERROR({ res, message: "Something went wrong" });
+    }
+  },
+
   getJobPostDetail: async (req, res) => {
     try {
       const { id } = req.params;
@@ -141,6 +237,64 @@ module.exports = {
         res,
         message: "Job post details fetched successfully",
         data: jobPost,
+      });
+    } catch (err) {
+      console.log("Error fetching job post", err);
+      return apiResponse.CATCH_ERROR({ res, message: message.something_went_wrong });
+    }
+  },
+
+  getJobpostOverviewCount: async (req, res) => {
+    try {
+      const reqBody = req.query
+      const query = { isActive: true, deletedAt: null }
+
+      if (reqBody.recruiterId) { query.recruiterId = new Types.ObjectId(reqBody.recruiterId) }
+      if (reqBody.applicantId) { query.hiredApplicantId = new Types.ObjectId(reqBody.applicantId) }
+
+      let jobCounts = await JobPostModel.aggregate([
+        {
+          $match: query
+        },
+        {
+          $group: {
+            _id: "$status",
+            count: { $sum: 1 }
+          }
+        },
+        {
+          $project: {
+            k: "$_id",
+            v: "$count",
+            _id: 0
+          }
+        },
+        {
+          $group: {
+            _id: null,
+            counts: { $push: { k: "$k", v: "$v" } }
+          }
+        },
+        {
+          $replaceRoot: {
+            newRoot: { $arrayToObject: "$counts" }
+          }
+        }
+      ]);
+      jobCounts = jobCounts[0]
+
+      return apiResponse.OK({
+        res,
+        message: "Job post overview count fetched successfully",
+        data: {
+          pending: jobCounts.pending ?? 0,
+          hired: jobCounts.hired ?? 0,
+          start: jobCounts.start ?? 0,
+          canceled: jobCounts.canceled ?? 0,
+          completed: jobCounts.completed ?? 0,
+          verified: jobCounts.verified ?? 0,
+          expired: jobCounts.expired ?? 0
+        }
       });
     } catch (err) {
       console.log("Error fetching job post", err);
@@ -517,7 +671,7 @@ module.exports = {
         limit: pageLimit,
       });
 
-      return apiResponse.OK({ res, message: `Job Post ${message.data_get}`, data: response });
+      return apiResponse.OK({ res, message: `Job Post ${message.data_get} `, data: response });
     } catch (err) {
       console.log("Error fetching job posts", err);
       return apiResponse.CATCH_ERROR({ res, message: message.something_went_wrong });
@@ -579,7 +733,7 @@ module.exports = {
         limit: pageLimit,
       });
 
-      return apiResponse.OK({ res, message: `Job Post ${message.data_get}`, data: response });
+      return apiResponse.OK({ res, message: `Job Post ${message.data_get} `, data: response });
     } catch (err) {
       console.log("Error fetching job posts", err);
       return apiResponse.CATCH_ERROR({ res, message: message.something_went_wrong });
@@ -633,7 +787,7 @@ module.exports = {
         limit: pageLimit,
       });
 
-      return apiResponse.OK({ res, message: `Job Post ${message.data_get}`, data: response });
+      return apiResponse.OK({ res, message: `Job Post ${message.data_get} `, data: response });
     } catch (err) {
       console.log("Error fetching job posts", err);
       return apiResponse.CATCH_ERROR({ res, message: message.something_went_wrong });
@@ -687,7 +841,7 @@ module.exports = {
         limit: pageLimit,
       });
 
-      return apiResponse.OK({ res, message: `Job Post ${message.data_get}`, data: response });
+      return apiResponse.OK({ res, message: `Job Post ${message.data_get} `, data: response });
     } catch (err) {
       console.log("Error fetching job posts", err);
       return apiResponse.CATCH_ERROR({ res, message: message.something_went_wrong });
@@ -741,7 +895,7 @@ module.exports = {
         limit: pageLimit,
       });
 
-      return apiResponse.OK({ res, message: `Job Post ${message.data_get}`, data: response });
+      return apiResponse.OK({ res, message: `Job Post ${message.data_get} `, data: response });
     } catch (err) {
       console.log("Error fetching job posts", err);
       return apiResponse.CATCH_ERROR({ res, message: message.something_went_wrong });

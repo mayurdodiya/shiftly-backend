@@ -33,6 +33,9 @@ router.put("/verified-job/:jobPostId", auth({ usersAllowed: [ROLE.HOSPITAL] }), 
 
 
 // ------------------------------- GET routes ------------------------------------------
+// list of applicant applied jobs only for hospital
+router.get("/list-applied-job", auth({ usersAllowed: [ROLE.HOSPITAL] }), validate(jobPostValidation.getOnlyAppliedJobPosts), postController.getOnlyAppliedJobPosts);
+
 // list of all jobs
 router.get("/list", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.EMPLOYEE] }), validate(jobPostValidation.getAllJobPost), postController.getAllJobPost);
 
@@ -51,9 +54,6 @@ router.get("/verified-job/list", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.EMPLO
 // view all expried jobs for hospital
 router.get("/expried-job/list", auth({ usersAllowed: [ROLE.HOSPITAL] }), validate(jobPostValidation.viewAllExpriedJobs), postController.viewAllExpriedJobs);
 
-// view job by id
-router.get("/:id", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.EMPLOYEE] }), validate(jobPostValidation.getJobPostDetails), postController.getJobPostDetail);
-
 // list of applicant
 router.get("/application/list", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.EMPLOYEE] }), validate(jobPostValidation.getAllApplications), postController.getAllApplications);
 
@@ -62,6 +62,12 @@ router.get("/my-applied-job/list", auth({ usersAllowed: [ROLE.EMPLOYEE] }), vali
 
 // view application by id
 router.get("/application/:id", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.EMPLOYEE] }), validate(jobPostValidation.getApplicationDetail), postController.getApplicationDetail);
+
+// get job post overview count
+router.get("/overview", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.EMPLOYEE] }), validate(jobPostValidation.getJobpostOverviewCount), postController.getJobpostOverviewCount);
+
+// view job by id
+router.get("/:id", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.EMPLOYEE] }), validate(jobPostValidation.getJobPostDetails), postController.getJobPostDetail);
 
 
 // ------------------------------- DELETE routes ---------------------------------------
