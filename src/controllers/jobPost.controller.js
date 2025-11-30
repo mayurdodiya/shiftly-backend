@@ -852,10 +852,12 @@ module.exports = {
   viewAllExpriedJobs: async (req, res) => {
     try {
       const { applicantId, recruiterId, search, city, state, startDate, endDate, page, limit } = req.query;
+      console.log(recruiterId,'-------------- recruiterId')
 
       const { skip, limit: pageLimit } = getPagination(page, limit);
 
-      let filterArr = [{ deletedAt: null, isActive: true, status: APPLICATION_STATUS.EXPIRED }];
+      // let filterArr = [{ deletedAt: null, isActive: true, status: APPLICATION_STATUS.EXPIRED }];
+      let filterArr = [{ deletedAt: null, isActive: true, status: APPLICATION_STATUS.PENDING, expireAt: { $lte: new Date() } }];
 
       // Search (title, description, skills)
       if (search) {

@@ -31,12 +31,12 @@ const JOB_POST_PAYMENT_STATUS = {
 const APPLICATION_STATUS = {
   // APPLIED: "applied",
   PENDING: "pending",
-  HIRED: "hired",
-  START_WORKING: "start",
+  HIRED: "hired",  // upcoming jobs
+  START_WORKING: "start", // ongoing jobs
   CANCELED: "canceled",
-  COMPLETED: "completed",
+  COMPLETED: "completed", // completed jobs
   VERIFIED: "verified", // if verified by hospital then send payment by admin
-  EXPIRED: "expired"
+  // EXPIRED: "expired" // expirtAt and pending status // will expiry which has no any hired applicant
 };
 
 module.exports = {
