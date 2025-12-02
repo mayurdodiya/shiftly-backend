@@ -66,8 +66,15 @@ const register = {
     city: Joi.string().trim().lowercase(),
     state: Joi.string().trim().lowercase(),
     address: Joi.string().trim().lowercase(),
+    fcmToken: Joi.string(),
     experience: Joi.number(),
     bankDetail: bankDetailValidation.required(),
+  }),
+};
+
+const updateFcm = {
+  body: Joi.object().keys({
+    fcmToken: Joi.string().required(),
   }),
 };
 
@@ -132,6 +139,7 @@ const changePassword = {
 
 module.exports = {
   register,
+  updateFcm,
   editProfile,
   sendOtp,
   verifyOtp,

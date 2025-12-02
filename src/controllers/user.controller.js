@@ -1,10 +1,7 @@
 const message = require("../json/message.json");
 const { UserModel, OtpModel, SettingModel } = require("../models");
 const apiResponse = require("../utils/api.response");
-const logger = require("../config/logger");
 const { comparePassword, generateToken, getPagination, pagingData, hashPassword } = require("../utils/utils");
-const sendEmail = require("../services/sendgrid");
-const { ROLE } = require("../utils/constant");
 
 module.exports = {
   register: async (req, res) => {
@@ -32,6 +29,19 @@ module.exports = {
       data.token = token;
 
       return apiResponse.OK({ res, message: message.user_add_success, data });
+    } catch (err) {
+      console.log(err)
+      return apiResponse.CATCH_ERROR({ res, message: message.something_went_wrong });
+    }
+  },
+
+  updateFcm: async (req, res) => {
+    try {
+      let reqBody = req.body;
+      const { user } = req;
+
+      await UserModel.findByIdAndUpdate(user._id, { fcmToken: reqBody.fcmToken });
+      return apiResponse.OK({ res, message: message.updated, });
     } catch (err) {
       console.log(err)
       return apiResponse.CATCH_ERROR({ res, message: message.something_went_wrong });

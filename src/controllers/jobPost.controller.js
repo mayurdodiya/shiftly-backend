@@ -6,6 +6,8 @@ const { Types } = mongoose;
 const moment = require("moment");
 const { getPagination, pagingData } = require("../utils/utils");
 const { APPLICATION_STATUS } = require("../utils/constant");
+// const { sendNotification } = require('./../services/send-noification')
+
 
 module.exports = {
   // Job post ----------------------------------
@@ -173,6 +175,11 @@ module.exports = {
           }
         },
         { $match: { "applications.0": { $exists: true } } }, // only posts with at least one application
+        {
+          $addFields: {
+            totalApplications: { $size: "$applications" }
+          }
+        },
         {
           $lookup: {
             from: "users",
@@ -852,7 +859,6 @@ module.exports = {
   viewAllExpriedJobs: async (req, res) => {
     try {
       const { applicantId, recruiterId, search, city, state, startDate, endDate, page, limit } = req.query;
-      console.log(recruiterId,'-------------- recruiterId')
 
       const { skip, limit: pageLimit } = getPagination(page, limit);
 
@@ -898,6 +904,51 @@ module.exports = {
       });
 
       return apiResponse.OK({ res, message: `Job Post ${message.data_get} `, data: response });
+    } catch (err) {
+      console.log("Error fetching job posts", err);
+      return apiResponse.CATCH_ERROR({ res, message: message.something_went_wrong });
+    }
+  },
+
+  // get job post all status overview count (ongoing, upcoming, completed, expired, verified)
+  jobpostStatusOverviewCount: async (req, res) => {
+    try {
+      const { applicantId, recruiterId } = req.query;
+
+      let filterArr = [{ deletedAt: null, isActive: true }];
+      if (applicantId) filterArr.push({ hiredApplicantId: applicantId });
+      if (recruiterId) filterArr.push({ recruiterId: recruiterId });
+
+      const filterQuery = filterArr.length > 0 ? { $and: filterArr } : {};
+
+      const [pending, hired, start, canceled, completed, verified, expired] = await Promise.all([
+        // pending
+        JobPostModel.countDocuments({ ...filterQuery, status: APPLICATION_STATUS.PENDING }),
+        // hired
+        JobPostModel.countDocuments({ ...filterQuery, status: APPLICATION_STATUS.HIRED }),
+        // start
+        JobPostModel.countDocuments({ ...filterQuery, status: APPLICATION_STATUS.START_WORKING }),
+        // canceled
+        JobPostModel.countDocuments({ ...filterQuery, status: APPLICATION_STATUS.CANCELED }),
+        // completed
+        JobPostModel.countDocuments({ ...filterQuery, status: APPLICATION_STATUS.COMPLETED }),
+        // verified
+        JobPostModel.countDocuments({ ...filterQuery, status: APPLICATION_STATUS.VERIFIED }),
+        // expired
+        JobPostModel.countDocuments({ ...filterQuery, status: APPLICATION_STATUS.PENDING, expireAt: { $lte: new Date() } })
+      ])
+
+      const response = {
+        pending,
+        hired,
+        start,
+        canceled,
+        completed,
+        verified,
+        expired
+      }
+
+      return apiResponse.OK({ res, message: `Job Post status overview count data ${message.data_get}`, data: response });
     } catch (err) {
       console.log("Error fetching job posts", err);
       return apiResponse.CATCH_ERROR({ res, message: message.something_went_wrong });
@@ -1015,9 +1066,12 @@ module.exports = {
   hireApplicant: async (req, res) => {
     try {
       const applicationId = req.params.applicationId;
+      const { user } = req;
 
       // Check if application exists and active
-      const application = await JobApplicationModel.findOne({ _id: applicationId, isActive: true });
+      const application = await JobApplicationModel.findOne({ _id: applicationId, isActive: true }).populate("applicantId");
+      console.log(application, '-----------application')
+      // return
       if (!application) return apiResponse.NOT_FOUND({ res, message: message.application_not_found });
 
       // check already hired or not
@@ -1026,6 +1080,9 @@ module.exports = {
 
       // change jobpost status
       await JobPostModel.findOneAndUpdate({ _id: application.jobPostId._id }, { status: APPLICATION_STATUS.HIRED, hiredApplicantId: application.applicantId });
+
+      // const title = "hire"
+      // await sendNotification(user.fcmToken, title, message);
 
       return apiResponse.OK({ res, message: message.application_status_updated, data: application });
     } catch (err) {

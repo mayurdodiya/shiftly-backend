@@ -27,6 +27,8 @@ router.post("/upload", upload.single("file"), utils.uploadImage);
 // edit user
 router.put("/edit-profile", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.EMPLOYEE, ROLE.ADMIN] }), validate(userValidation.editProfile), userController.editProfile);
 
+// update fcm token
+router.put("/fcm-token", validate(userValidation.updateFcm), userController.register);
 
 // ------------------------------- GET routes ------------------------------------------
 // get setting details

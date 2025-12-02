@@ -487,6 +487,16 @@ const getJobpostOverviewCount = {
     }),
 };
 
+const jobpostStatusOverviewCount = {
+  query: Joi.object().keys({
+    applicantId: objectId().optional(),
+    recruiterId: objectId().optional(),
+  }).or("applicantId", "recruiterId")
+    .messages({
+      "object.missing": "Either applicantId or recruiterId is required in query params.",
+    }),
+};
+
 module.exports = {
   addJobPost,
   // editJobPost,
@@ -508,4 +518,5 @@ module.exports = {
   completeJobByEmployee,
   verifiedJobByHospital,
   getJobpostOverviewCount,
+  jobpostStatusOverviewCount,
 };
