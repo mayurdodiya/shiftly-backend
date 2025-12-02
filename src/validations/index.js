@@ -1,5 +1,6 @@
-module.exports.authValidation = require("./auth.validation"); // Auth validations.
-module.exports.userValidation = require("./user.validation"); // User validations.
-module.exports.jobPostValidation = require("./jobPost.validation"); // Post validations.
+module.exports.authValidation = require("./auth.validation");
+module.exports.userValidation = require("./user.validation");
+module.exports.jobPostValidation = require("./jobPost.validation");
+module.exports.notificationValidation = require("./notification.validator");
 
 

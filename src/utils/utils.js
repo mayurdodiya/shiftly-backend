@@ -15,6 +15,7 @@ module.exports = {
   },
 
   decodeToken: ({ token }) => {
+    console.log(token,'---------------token 1')
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     return decoded;
   },

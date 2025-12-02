@@ -1,9 +1,9 @@
 const message = require("../json/message.json");
-const { JobPostModel, UserModel, SettingModel, JobApplicationModel } = require("../models");
+const { JobPostModel, UserModel, SettingModel, JobApplicationModel, NotificationModel } = require("../models");
 const apiResponse = require("../utils/api.response");
 const mongoose = require("mongoose");
 const { Types } = mongoose;
-const moment = require("moment"); 
+const moment = require("moment");
 const { getPagination, pagingData } = require("../utils/utils");
 const { APPLICATION_STATUS } = require("../utils/constant");
 // const { sendNotification } = require('./../services/send-noification')
@@ -316,7 +316,7 @@ module.exports = {
       const { user } = req;
 
       // Check job exists
-      const jobPost = await JobPostModel.findOne({ _id: jobPostId, isActive: true });
+      const jobPost = await JobPostModel.findOne({ _id: jobPostId, isActive: true }).populate("recruiterId", "_id name fcmToken");
       if (!jobPost) return apiResponse.NOT_FOUND({ res, message: message.job_post_not_found });
 
       const newStart = new Date(jobPost.jobStartDate);
@@ -348,6 +348,14 @@ module.exports = {
 
       // Create new application
       const application = await JobApplicationModel.create({ jobPostId, applicantId: user._id });
+
+      // notification
+      const title = "New Job Application"
+      const msg = `${user.name} applied for the "${jobPost.title}" position.`
+      await Promise.all([
+        // sendNotification(jobPost.recruiterId.fcmToken, title, msg),
+        NotificationModel.create({ userId: jobPost.recruiterId._id, title: title, body: msg, })
+      ])
 
       return apiResponse.OK({ res, message: message.job_applied_success, data: application });
     } catch (err) {
@@ -961,12 +969,20 @@ module.exports = {
       const id = req.params.jobPostId;
       const { user } = req;
 
-      const job = await JobPostModel.findOne({ _id: id }).lean();
+      const job = await JobPostModel.findOne({ _id: id }).populate("recruiterId", "_id name fcmToken").lean();
       if (!job) return apiResponse.NOT_FOUND({ res, message: message.job_post_not_found });
       if (job.hiredApplicantId != user._id.toString()) return apiResponse.UNAUTHORIZED({ res, message: message.you_not_hired_for_job });
       if (job.status == APPLICATION_STATUS.START_WORKING) return apiResponse.VALIDATION_ERROR({ res, message: message.already_start_job });
 
       await JobPostModel.findOneAndUpdate({ _id: id }, { status: APPLICATION_STATUS.START_WORKING });
+
+      // notification
+      const title = "Applicant Arriving Soon"
+      const msg = `${user.name} will arrive at your hospital in a few minutes.`
+      await Promise.all([
+        // sendNotification(job.recruiterId.fcmToken, title, msg),
+        NotificationModel.create({ userId: job.recruiterId._id, title: title, body: msg, })
+      ])
 
       return apiResponse.OK({ res, message: message.application_status_updated });
     } catch (err) {
@@ -981,13 +997,22 @@ module.exports = {
       const id = req.params.jobPostId;
       const { user } = req;
 
-      const job = await JobPostModel.findOne({ _id: id }).lean();
+      const job = await JobPostModel.findOne({ _id: id }).populate("recruiterId", "_id name fcmToken").lean();
       if (!job) return apiResponse.NOT_FOUND({ res, message: message.job_post_not_found });
       if (job.hiredApplicantId != user._id.toString()) return apiResponse.UNAUTHORIZED({ res, message: message.you_not_hired_for_job });
       if (job.status == APPLICATION_STATUS.COMPLETED) return apiResponse.VALIDATION_ERROR({ res, message: message.already_completed_job });
       if (job.status !== APPLICATION_STATUS.START_WORKING) return apiResponse.VALIDATION_ERROR({ res, message: message.job_not_start });
 
       await JobPostModel.findOneAndUpdate({ _id: id }, { status: APPLICATION_STATUS.COMPLETED });
+
+      // notification
+      const title = "Shift Completed"
+      const msg = `${user.name} has completed their duty at your hospital.`
+
+      await Promise.all([
+        // sendNotification(job.recruiterId.fcmToken, title, msg),
+        NotificationModel.create({ userId: job.recruiterId._id, title: title, body: msg, })
+      ])
 
       return apiResponse.OK({ res, message: message.application_status_updated });
     } catch (err) {
@@ -1002,12 +1027,21 @@ module.exports = {
       const id = req.params.jobPostId;
       const { user } = req;
 
-      const job = await JobPostModel.findOne({ _id: id, recruiterId: user._id }).lean();
+      const job = await JobPostModel.findOne({ _id: id, recruiterId: user._id }).populate("hiredApplicantId", "_id name fcmToken").lean();
+
       if (!job) return apiResponse.NOT_FOUND({ res, message: message.job_post_not_found });
       if (job.status == APPLICATION_STATUS.VERIFIED) return apiResponse.VALIDATION_ERROR({ res, message: message.already_verified_job });
       if (job.status !== APPLICATION_STATUS.COMPLETED) return apiResponse.VALIDATION_ERROR({ res, message: message.pending_job_completion });
 
       await JobPostModel.findOneAndUpdate({ _id: id }, { status: APPLICATION_STATUS.VERIFIED });
+
+      // notification
+      const title = "Work Approved"
+      const msg = `Your work has been verified by ${user.name}.`
+      await Promise.all([
+        // sendNotification(job.hiredApplicantId.fcmToken, title, msg),
+        NotificationModel.create({ userId: job.recruiterId._id, title: title, body: msg, })
+      ])
 
       return apiResponse.OK({ res, message: message.application_status_updated });
     } catch (err) {
@@ -1067,11 +1101,12 @@ module.exports = {
     try {
       const applicationId = req.params.applicationId;
       const { user } = req;
+      console.log(user, '-----user')
 
       // Check if application exists and active
       const application = await JobApplicationModel.findOne({ _id: applicationId, isActive: true }).populate("applicantId");
-      console.log(application, '-----------application')
-      // return
+      console.log(application.applicantId.fcmToken, '-----------application')
+
       if (!application) return apiResponse.NOT_FOUND({ res, message: message.application_not_found });
 
       // check already hired or not
@@ -1081,8 +1116,14 @@ module.exports = {
       // change jobpost status
       await JobPostModel.findOneAndUpdate({ _id: application.jobPostId._id }, { status: APPLICATION_STATUS.HIRED, hiredApplicantId: application.applicantId });
 
-      // const title = "hire"
-      // await sendNotification(user.fcmToken, title, message);
+      // notification
+      const title = "Appointment Confirmed"
+      const msg = `Your work has been verified by ${user.name}.`
+
+      await Promise.all([
+        // sendNotification(application.applicantId.fcmToken, title, msg),
+        NotificationModel.create({ userId: job.recruiterId._id, title: title, body: msg, })
+      ])
 
       return apiResponse.OK({ res, message: message.application_status_updated, data: application });
     } catch (err) {

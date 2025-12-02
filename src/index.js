@@ -2,6 +2,8 @@ const express = require("express");
 require("dotenv").config();
 const logger = require("./config/logger");
 const connectDB = require("./db/dbConnection");
+const http = require("http");
+
 const routes = require("./routes");
 const message = require("./json/message.json");
 const cors = require("cors");
@@ -13,10 +15,13 @@ const apiResponse = require("./utils/api.response");
 const multer = require("multer");
 const adminSeeder = require("./seeder/admin.seeder");
 const settingSeeder = require("./seeder/setting.seeder");
+const setSocket = require("./services/socket-io");
+
 
 // MIDDLEWARES MUST COME BEFORE SERVER START
 
 app.use(express.json());
+const server = http.createServer(app);
 app.use(express.urlencoded({ extended: true }));
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
@@ -52,11 +57,18 @@ app.use((req, res) => {
 // START SERVER AFTER EVERYTHING IS SET
 connectDB()
   .then(() => {
-    app.listen(process.env.PORT || 3000, "0.0.0.0", () => {
+    server.listen(process.env.PORT || 3000, "0.0.0.0", () => {
       logger.info(`Server is running`);
     });
   })
   .catch((error) => console.log(error));
+
+const io = require("socket.io")(server, {
+  cors: {
+    origin: "*",
+  },
+});
+setSocket(io);
 
 settingSeeder();
 adminSeeder();
