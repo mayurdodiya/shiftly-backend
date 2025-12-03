@@ -1,7 +1,8 @@
 const message = require("../json/message.json");
-const { UserModel, OtpModel, SettingModel } = require("../models");
+const { UserModel, OtpModel, SettingModel, JobPostModel } = require("../models");
 const apiResponse = require("../utils/api.response");
 const { comparePassword, generateToken, getPagination, pagingData, hashPassword } = require("../utils/utils");
+const { APPLICATION_STATUS, ROLE } = require("../utils/constant");
 // const sendOTP = require("../services/sms")
 
 module.exports = {
@@ -49,6 +50,19 @@ module.exports = {
     }
   },
 
+  setCommissionPercentage: async (req, res) => {
+    try {
+      let reqBody = req.body;
+
+      const setting = await SettingModel.findOne({ deletedAt: null });
+      await SettingModel.findByIdAndUpdate(setting._id, { commission: reqBody.commission });
+      return apiResponse.OK({ res, message: message.updated, });
+    } catch (err) {
+      console.log(err)
+      return apiResponse.CATCH_ERROR({ res, message: message.something_went_wrong });
+    }
+  },
+
   loginUser: async (req, res) => {
     try {
       const reqBody = req.body;
@@ -85,7 +99,7 @@ module.exports = {
       const otp = "0000";
       // send otp with the tool pending******
 
-      
+
 
       await Promise.all([
         OtpModel.findOneAndUpdate({ phone }, { otp: otp, expiryTime: new Date(Date.now() + 1 * 60 * 1000) }, { upsert: true, new: true }),
@@ -107,7 +121,7 @@ module.exports = {
 
   verifyOtp: async (req, res) => {
     try {
-      const { phone, otp } = req.body;
+      const { phone, otp, fcmToken } = req.body;
 
       const otpData = await OtpModel.findOne({ phone });
       if (!otpData) return apiResponse.NOT_FOUND({ res, message: message.phone_not_found });
@@ -123,6 +137,10 @@ module.exports = {
         user.token = token;
       } else {
         user = { isNewUser: true };
+      }
+
+      if (user.isNewUser == false) {
+        await UserModel.findByIdAndUpdate(user._id, { fcmToken: fcmToken })
       }
 
       return apiResponse.OK({ res, message: message.otp_verified, data: user });
@@ -235,37 +253,107 @@ module.exports = {
 
   getAllUser: async (req, res) => {
     try {
-      const { search, page, limit, isActive, role } = req.query;
+      const { search, page, limit, isActive, role, city, state, sortField, sortOrder, } = req.query;
       const { skip, limit: pageLimit } = getPagination(page, limit);
 
-      let DataObj = [{ deletedAt: null }];
+      let filters = { deletedAt: null };
 
       if (search) {
         const regSearch = new RegExp(search, "i");
-        DataObj = [
-          ...DataObj,
-          {
-            $or: [{ name: regSearch }, { email: regSearch }, { phone: regSearch }],
-          },
+        filters.$or = [
+          { name: regSearch },
+          { email: regSearch },
+          { phone: regSearch },
+          { profession: regSearch },
+          { city: regSearch },
+          { state: regSearch },
         ];
       }
 
-      if (isActive === true) {
-        DataObj.push({ isActive: true });
-      } else if (isActive === false) {
-        DataObj.push({ isActive: false });
-      }
-      if (role) {
-        DataObj.push({ role });
-      }
-      const filterQuery = DataObj.length > 0 ? { $and: DataObj } : { deletedAt: null };
+      // role filter
+      if (role) filters.role = role;
 
-      const data = await UserModel.find(filterQuery).select("-password -reset_link_expiry").skip(skip).limit(pageLimit).sort({ createdAt: -1 });
-      const response = pagingData({ data: data, total: data?.length, page, limit: pageLimit });
-      return apiResponse.OK({ res, message: `User ${message.data_get}`, data: response });
+      // isActive filter
+      if (isActive == true) {
+        filters.isActive = true
+      } else if (isActive == false) {
+        filters.isActive = false
+      }
+
+      // city / state filters
+      if (city) filters.city = new RegExp(`^${city}$`, "i");
+      if (state) filters.state = new RegExp(`^${state}$`, "i");
+
+      // Sorting
+      const sort = {};
+      sort[sortField] = sortOrder === "asc" ? 1 : -1;
+
+      // Fetch data
+      const data = await UserModel.find(filters)
+        .select("-password -reset_link_expiry")
+        .skip(skip)
+        .limit(pageLimit)
+        .sort(sort);
+
+      const total = await UserModel.countDocuments(filters);
+
+      const response = pagingData({
+        data,
+        total,
+        page,
+        limit: pageLimit,
+      });
+
+      return apiResponse.OK({
+        res,
+        message: `User ${message.data_get}`,
+        data: response,
+      });
     } catch (err) {
       console.log(err);
-      return apiResponse.CATCH_ERROR({ res, message: message.something_went_wrong });
+      return apiResponse.CATCH_ERROR({ res, message: message.something_went_wrong, });
     }
   },
+
+  adminDashboardOverviewCount: async (req, res) => {
+    try {
+      const [hospitalCount, employeeCount, refundReqCount, refundCompletedCount, completedReqCount, ongoingJobCount, totalRevenue] = await Promise.all([
+        // total hospital count
+        UserModel.countDocuments({ role: ROLE.HOSPITAL }),
+        // total employee count
+        UserModel.countDocuments({ role: ROLE.EMPLOYEE }),
+        // total refund req count
+        JobPostModel.countDocuments({ status: APPLICATION_STATUS.REFUND_REQUEST }),
+        // total refund completed req count
+        JobPostModel.countDocuments({ status: APPLICATION_STATUS.REFUND_COMPLETED }),
+        // total completed req count
+        JobPostModel.countDocuments({ status: APPLICATION_STATUS.COMPLETED }),
+        // total ongoing req count
+        JobPostModel.countDocuments({ status: APPLICATION_STATUS.START_WORKING }),
+        // total revenue
+        JobPostModel.aggregate([
+          {
+            $match: {
+              status: APPLICATION_STATUS.VERIFIED
+            }
+          },
+          {
+            $group: {
+              _id: null,
+              totalAdminFee: { $sum: "$adminFee" }
+            }
+          }
+        ]),
+      ])
+      const obj = {
+        hospitalCount, employeeCount, refundReqCount, refundCompletedCount, completedReqCount, ongoingJobCount, totalRevenue: totalRevenue[0].totalAdminFee
+      }
+
+      return apiResponse.OK({ res, message: `Dashboard overview data ${message.data_get}`, data: obj, });
+    } catch (err) {
+      console.log(err);
+      return apiResponse.CATCH_ERROR({ res, message: message.something_went_wrong, });
+    }
+  },
+
 };

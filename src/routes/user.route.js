@@ -27,15 +27,23 @@ router.post("/upload", upload.single("file"), utils.uploadImage);
 // edit user
 router.put("/edit-profile", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.EMPLOYEE, ROLE.ADMIN] }), validate(userValidation.editProfile), userController.editProfile);
 
-// update fcm token
-router.put("/fcm-token", validate(userValidation.updateFcm), userController.register);
+router.put("/fcm-token", validate(userValidation.updateFcm), userController.updateFcm);
+
+// update commission percentage
+router.put("/set-commission-percentage", auth({ usersAllowed: [ROLE.ADMIN] }), validate(userValidation.setCommissionPercentage), userController.setCommissionPercentage);
 
 // ------------------------------- GET routes ------------------------------------------
 // get setting details
-router.get("/setting",auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.ADMIN] }), userController.getSetting);
+router.get("/setting", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.ADMIN] }), userController.getSetting);
 
 // view profile
 router.get("/profile", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.EMPLOYEE, ROLE.ADMIN] }), userController.getProfile);
+
+// get all user (hospital, employee)
+router.get("/user-list", auth({ usersAllowed: [ROLE.ADMIN] }), validate(userValidation.getAllUser), userController.getAllUser);
+
+// get dashboard overview count
+router.get("/dashboard-overview", /* auth({ usersAllowed: [ROLE.ADMIN] }), */ userController.adminDashboardOverviewCount);
 
 // get user details
 // router.get("/:id", /* validate(userValidation.changePassword), */ userController.getUser);

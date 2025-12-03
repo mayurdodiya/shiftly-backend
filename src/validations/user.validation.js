@@ -1,5 +1,5 @@
 const Joi = require("joi");
-const { ROLE } = require("../utils/constant");
+const { ROLE, APPLICATION_STATUS } = require("../utils/constant");
 
 const bankDetailValidation = Joi.object({
   bankName: Joi.string().trim().lowercase().required().messages({
@@ -78,6 +78,12 @@ const updateFcm = {
   }),
 };
 
+const setCommissionPercentage = {
+  body: Joi.object().keys({
+    commission: Joi.number().required(),
+  }),
+};
+
 const editProfile = {
   body: Joi.object({
     name: Joi.string().trim().lowercase().optional(),
@@ -126,6 +132,7 @@ const verifyOtp = {
         "string.pattern.base": "Phone number must be a valid 10-digit Indian number starting with 6-9",
       }),
     otp: Joi.string().required(),
+    fcmToken: Joi.string().optional(),
   }),
 };
 
@@ -137,6 +144,20 @@ const changePassword = {
   }),
 };
 
+const getAllUser = {
+  query: Joi.object({
+    search: Joi.string().trim().optional(),
+    role: Joi.string().valid(ROLE.ADMIN, ROLE.EMPLOYEE, ROLE.HOSPITAL).optional(),
+    isActive: Joi.boolean().optional(),
+    city: Joi.string().trim().lowercase().optional(),
+    state: Joi.string().trim().lowercase().optional(),
+    page: Joi.number().min(1).default(1),
+    limit: Joi.number().min(1).max(100).default(10),
+    sortField: Joi.string().valid("name", "email", "phone", "createdAt").default("createdAt"),
+    sortOrder: Joi.string().valid("asc", "desc").default("desc"),
+  }),
+};
+
 module.exports = {
   register,
   updateFcm,
@@ -144,4 +165,6 @@ module.exports = {
   sendOtp,
   verifyOtp,
   changePassword,
+  setCommissionPercentage,
+  getAllUser,
 };
