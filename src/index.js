@@ -69,6 +69,6 @@ const io = require("socket.io")(server, {
   },
 });
 setSocket(io);
-
+require("./services/cron");
 settingSeeder();
 adminSeeder();

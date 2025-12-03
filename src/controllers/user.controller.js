@@ -2,6 +2,7 @@ const message = require("../json/message.json");
 const { UserModel, OtpModel, SettingModel } = require("../models");
 const apiResponse = require("../utils/api.response");
 const { comparePassword, generateToken, getPagination, pagingData, hashPassword } = require("../utils/utils");
+// const sendOTP = require("../services/sms")
 
 module.exports = {
   register: async (req, res) => {
@@ -73,6 +74,8 @@ module.exports = {
   sendOtp: async (req, res) => {
     try {
       const { phone } = req.body;
+      // const sendSuccess = await sendOTP(phone, "1234")
+      // console.log(sendSuccess,'--------------------sendSuccess')
       // const user = await OtpModel.findOne({ phone, deletedAt: null });
       // if (!user) {
       //   return apiResponse.NOT_FOUND({ res, message: message.phone_not_found });
@@ -81,6 +84,8 @@ module.exports = {
       // const otp = Math.floor(1000 + Math.random() * 9000);
       const otp = "0000";
       // send otp with the tool pending******
+
+      
 
       await Promise.all([
         OtpModel.findOneAndUpdate({ phone }, { otp: otp, expiryTime: new Date(Date.now() + 1 * 60 * 1000) }, { upsert: true, new: true }),

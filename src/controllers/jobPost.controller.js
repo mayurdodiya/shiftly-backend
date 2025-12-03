@@ -5,7 +5,7 @@ const mongoose = require("mongoose");
 const { Types } = mongoose;
 const moment = require("moment");
 const { getPagination, pagingData } = require("../utils/utils");
-const { APPLICATION_STATUS } = require("../utils/constant");
+const { APPLICATION_STATUS, ROLE } = require("../utils/constant");
 // const { sendNotification } = require('./../services/send-noification')
 
 
@@ -918,6 +918,112 @@ module.exports = {
     }
   },
 
+  // view all refund request for hospital and admin
+  viewAllRefundRequest: async (req, res) => {
+    try {
+      const { recruiterId, search, city, state, startDate, endDate, page, limit } = req.query;
+
+      const { skip, limit: pageLimit } = getPagination(page, limit);
+
+      let filterArr = [{ deletedAt: null, isActive: true, status: APPLICATION_STATUS.REFUND_REQUEST }];
+
+      // Search (title, description, skills)
+      if (search) {
+        const reg = new RegExp(search, "i");
+        filterArr.push({
+          $or: [{ title: reg }, { "location.city": reg }, { "location.state": reg }],
+        });
+      }
+
+      if (recruiterId) filterArr.push({ recruiterId: recruiterId });
+
+      // Location Filters
+      if (city) filterArr.push({ "location.city": city });
+      if (state) filterArr.push({ "location.state": state });
+
+      // Date Range Filter
+      if (startDate) {
+        filterArr.push({
+          jobStartDate: { $gte: new Date(startDate) },
+        });
+      }
+      if (endDate) {
+        filterArr.push({
+          jobStartDate: { $lte: new Date(endDate) },
+        });
+      }
+
+      const filterQuery = filterArr.length > 0 ? { $and: filterArr } : {};
+      const data = await JobPostModel.find(filterQuery).populate("recruiterId", "name email phone role").skip(skip).limit(pageLimit).sort({ jobStartDate: -1 });
+      const totalCount = await JobPostModel.countDocuments(filterQuery);
+
+      const response = pagingData({
+        data,
+        total: totalCount,
+        page,
+        limit: pageLimit,
+      });
+
+      return apiResponse.OK({ res, message: `Job Post ${message.data_get} `, data: response });
+    } catch (err) {
+      console.log("Error fetching job posts", err);
+      return apiResponse.CATCH_ERROR({ res, message: message.something_went_wrong });
+    }
+  },
+
+  // view all refund completed jobs for hospital and admin
+  viewAllRefundCompletedRequest: async (req, res) => {
+    try {
+      const { recruiterId, search, city, state, startDate, endDate, page, limit } = req.query;
+
+      const { skip, limit: pageLimit } = getPagination(page, limit);
+
+      let filterArr = [{ deletedAt: null, isActive: true, status: APPLICATION_STATUS.REFUND_COMPLETED }];
+
+      // Search (title, description, skills)
+      if (search) {
+        const reg = new RegExp(search, "i");
+        filterArr.push({
+          $or: [{ title: reg }, { "location.city": reg }, { "location.state": reg }],
+        });
+      }
+
+      if (recruiterId) filterArr.push({ recruiterId: recruiterId });
+
+      // Location Filters
+      if (city) filterArr.push({ "location.city": city });
+      if (state) filterArr.push({ "location.state": state });
+
+      // Date Range Filter
+      if (startDate) {
+        filterArr.push({
+          jobStartDate: { $gte: new Date(startDate) },
+        });
+      }
+      if (endDate) {
+        filterArr.push({
+          jobStartDate: { $lte: new Date(endDate) },
+        });
+      }
+
+      const filterQuery = filterArr.length > 0 ? { $and: filterArr } : {};
+      const data = await JobPostModel.find(filterQuery).populate("recruiterId", "name email phone role").skip(skip).limit(pageLimit).sort({ jobStartDate: -1 });
+      const totalCount = await JobPostModel.countDocuments(filterQuery);
+
+      const response = pagingData({
+        data,
+        total: totalCount,
+        page,
+        limit: pageLimit,
+      });
+
+      return apiResponse.OK({ res, message: `Job Post ${message.data_get} `, data: response });
+    } catch (err) {
+      console.log("Error fetching job posts", err);
+      return apiResponse.CATCH_ERROR({ res, message: message.something_went_wrong });
+    }
+  },
+
   // get job post all status overview count (ongoing, upcoming, completed, expired, verified)
   jobpostStatusOverviewCount: async (req, res) => {
     try {
@@ -1128,6 +1234,72 @@ module.exports = {
       return apiResponse.OK({ res, message: message.application_status_updated, data: application });
     } catch (err) {
       console.log("Error updating application status:", err);
+      return apiResponse.CATCH_ERROR({ res, message: message.something_went_wrong });
+    }
+  },
+
+  // only for hospital user 
+  requestForRefund: async (req, res) => {
+    try {
+      const { jobPostId } = req.params;
+      const { user } = req;
+
+      // Check job exists
+      const jobPost = await JobPostModel.findOne({ _id: jobPostId, isActive: true }).populate("recruiterId", "_id name fcmToken");
+      if (!jobPost) return apiResponse.NOT_FOUND({ res, message: message.job_post_not_found });
+      if (jobPost.status === APPLICATION_STATUS.REFUND_REQUEST) return apiResponse.BAD_REQUEST({ res, message: message.refund_request_already_sent })
+
+      if (jobPost.status === APPLICATION_STATUS.PENDING && jobPost.expireAt < new Date()) {
+        await JobPostModel.findByIdAndUpdate(jobPostId, { status: APPLICATION_STATUS.REFUND_REQUEST });
+
+        // notification
+        const title = "New refund request"
+        const msg = `${user.name} has requested a refund for ${jobPost.title}, request id is ${jobPost._id}.`
+        const admin = await UserModel.findOne({ role: ROLE.ADMIN }).lean()
+        await Promise.all([
+          // admin have no fcm token sendNotification(jobPost.recruiterId.fcmToken, title, msg),
+          NotificationModel.create({ userId: admin._id, title: title, body: msg, })
+        ])
+
+        return apiResponse.OK({ res, message: `${message.refund_request_sent}, request id is ${jobPost._id}.` });
+      } else {
+        return apiResponse.BAD_REQUEST({ res, message: message.refund_req_after_expire });
+      }
+
+    } catch (err) {
+      console.log("Error requestForRefund to job:", err);
+      return apiResponse.CATCH_ERROR({ res, message: message.something_went_wrong });
+    }
+  },
+
+  sendRefundToHospital: async (req, res) => {
+    try {
+      const { jobPostId } = req.params;
+
+      const jobPost = await JobPostModel.findOne({ _id: jobPostId, isActive: true, deletedAt: null }).populate("recruiterId", "_id name fcmToken");
+      if (!jobPost) return apiResponse.NOT_FOUND({ res, message: message.job_post_not_found });
+
+      // If file uploaded, store URL from S3
+      let refundUrl = "";
+      if (req.file && req.file.location) {
+        refundUrl = req.file.location;
+      } else {
+        return apiResponse.VALIDATION_ERROR({ res, message: message.refund_payment_image_required });
+      }
+
+      await JobPostModel.findByIdAndUpdate(jobPostId, { refundUrl: refundUrl, status: APPLICATION_STATUS.REFUND_COMPLETED })
+
+      // notification
+      const title = "Refund Credited"
+      const msg = `${jobPost.recruiterId.name}'s refund for ${jobPost.title} post has been successfully credited. Request ID: ${jobPost._id}.`
+      await Promise.all([
+        // sendNotification(jobPost.recruiterId.fcmToken, title, msg),
+        NotificationModel.create({ userId: jobPost.recruiterId._id, title: title, body: msg, })
+      ])
+      return apiResponse.OK({ res, message: msg });
+
+    } catch (err) {
+      console.log("Error sendRefundToHospital to job:", err);
       return apiResponse.CATCH_ERROR({ res, message: message.something_went_wrong });
     }
   },

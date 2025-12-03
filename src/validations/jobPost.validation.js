@@ -357,6 +357,18 @@ const applyJob = {
   }),
 };
 
+const requestForRefund = {
+  params: Joi.object({
+    jobPostId: objectId("Job Post ID").required(),
+  }),
+};
+
+const sendRefundToHospital = {
+  params: Joi.object({
+    jobPostId: objectId("Job Post ID").required(),
+  }),
+};
+
 const hireApplicant = {
   params: Joi.object().keys({
     applicationId: objectId("Application ID").required(),
@@ -519,4 +531,6 @@ module.exports = {
   verifiedJobByHospital,
   getJobpostOverviewCount,
   jobpostStatusOverviewCount,
+  requestForRefund,
+  sendRefundToHospital,
 };

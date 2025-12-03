@@ -37,6 +37,8 @@ const APPLICATION_STATUS = {
   COMPLETED: "completed", // completed jobs
   VERIFIED: "verified", // if verified by hospital then send payment by admin
   // EXPIRED: "expired" // expirtAt and pending status // will expiry which has no any hired applicant
+  REFUND_REQUEST: "refund_requested",
+  REFUND_COMPLETED: "refund_completed",
 };
 
 module.exports = {

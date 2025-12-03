@@ -5,6 +5,7 @@ const validate = require("../middlewares/validate");
 const { jobPostValidation } = require("../validations");
 const { auth } = require("../middlewares/auth");
 const { ROLE } = require("../utils/constant");
+const { upload } = require("../../src/services/s3.upload");
 
 
 // ------------------------------- POST routes -----------------------------------------
@@ -16,6 +17,12 @@ router.post("/apply", auth({ usersAllowed: [ROLE.EMPLOYEE] }), validate(jobPostV
 
 // payment by hospital for new job posting
 router.post("/payment", auth({ usersAllowed: [ROLE.HOSPITAL] }), /* validate(jobPostValidation.applyJob), */ postController.addJobPostPayment);
+
+// request refund for admin (Hospital only)
+router.post("/refund-request/:jobPostId", auth({ usersAllowed: [ROLE.HOSPITAL] }), validate(jobPostValidation.requestForRefund), postController.requestForRefund);
+
+// send refund to hospital (Admin only)
+router.post("/send-refund/:jobPostId", upload.single("file"), /* auth({ usersAllowed: [ROLE.ADMIN] }), */ validate(jobPostValidation.sendRefundToHospital), postController.sendRefundToHospital);
 
 
 // ------------------------------- PUT routes ------------------------------------------
@@ -43,19 +50,25 @@ router.get("/list", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.EMPLOYEE] }), vali
 router.get("/status-overview", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.EMPLOYEE] }), /* validate(jobPostValidation.jobpostStatusOverviewCount), */ postController.jobpostStatusOverviewCount);
 
 // view all upcoming jobs for hospital and employee
-router.get("/upcoming-job/list", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.EMPLOYEE] }), validate(jobPostValidation.viewAllUpcomingJobs), postController.viewAllUpcomingJobs);
+router.get("/upcoming-job/list", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.EMPLOYEE, ROLE.ADMIN] }), validate(jobPostValidation.viewAllUpcomingJobs), postController.viewAllUpcomingJobs);
 
 // view all ongoing jobs for hospital and employee
-router.get("/ongoing-job/list", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.EMPLOYEE] }), validate(jobPostValidation.viewAllUpcomingJobs), postController.viewAllOngoingJobs);
+router.get("/ongoing-job/list", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.EMPLOYEE, ROLE.ADMIN] }), validate(jobPostValidation.viewAllUpcomingJobs), postController.viewAllOngoingJobs);
 
 // view all completed jobs for hospital and employee
-router.get("/completed-job/list", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.EMPLOYEE] }), validate(jobPostValidation.viewAllCompletedJobs), postController.viewAllCompletedJobs);
+router.get("/completed-job/list", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.EMPLOYEE, ROLE.ADMIN] }), validate(jobPostValidation.viewAllCompletedJobs), postController.viewAllCompletedJobs);
 
 // view all verified jobs for hospital and employee
-router.get("/verified-job/list", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.EMPLOYEE] }), validate(jobPostValidation.viewAllVerifiedJobs), postController.viewAllVerifiedJobs);
+router.get("/verified-job/list", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.EMPLOYEE, ROLE.ADMIN] }), validate(jobPostValidation.viewAllVerifiedJobs), postController.viewAllVerifiedJobs);
 
 // view all expried jobs for hospital
-router.get("/expried-job/list", auth({ usersAllowed: [ROLE.HOSPITAL] }), validate(jobPostValidation.viewAllExpriedJobs), postController.viewAllExpriedJobs);
+router.get("/expried-job/list", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.ADMIN] }), validate(jobPostValidation.viewAllExpriedJobs), postController.viewAllExpriedJobs);
+
+// view all refund request for hospital and admin
+router.get("/refund-req/list", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.ADMIN] }), validate(jobPostValidation.viewAllExpriedJobs), postController.viewAllRefundRequest);
+
+// view all refund completed jobs for hospital and admin
+router.get("/refund-completed/list", auth({ usersAllowed: [ROLE.HOSPITAL] }), validate(jobPostValidation.viewAllExpriedJobs), postController.viewAllRefundCompletedRequest);
 
 // list of applicant
 router.get("/application/list", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.EMPLOYEE] }), validate(jobPostValidation.getAllApplications), postController.getAllApplications);

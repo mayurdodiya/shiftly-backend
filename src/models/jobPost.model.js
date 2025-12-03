@@ -88,6 +88,9 @@ const jobPostSchema = mongoose.Schema(
       ref: "payment",
       default: null,
     },
+    refundUrl: {
+      type: String,
+    },
     employeePaymentId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "payment",

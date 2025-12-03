@@ -11,6 +11,7 @@
   "something_went_wrong": "Something went to wrong, please try again later.",
   "reset_password_link": "Reset Password Link send successfully.",
   "account_blocked": "Your account has been blocked, please contact to admin.",
+  "refund_payment_image_required": "Please upload the refund payment image to proceed.",
   "invalid_password": "Invalid Password.",
   "password_reset": "Password is reset successfully.",
   "reset_link_expired": "Reset link is expired.",
@@ -73,5 +74,8 @@
   "invalid_status_change": "Status cannot be updated for a completed application.",
   "invalid_status_change_verified": "Status cannot be updated for a verified application.",
   "job_applied_success": "Job applied successfully.",
+  "refund_request_sent": "Refund request submitted",
+  "refund_request_already_sent": "Refund request is already sent.",
+  "refund_req_after_expire": "You can request a refund once the job has expired.",
   "payment_success": "Payment successfully proceed."
 }
