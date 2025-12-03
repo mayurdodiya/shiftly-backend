@@ -1,13 +1,14 @@
 {
-  "type": "service_account",
-  "project_id": "pech-tech",
-  "private_key_id": "cfe449dc380cc1b63a81a3d471e1c00bee25bcb0",
-  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCtfSlF4Z/uyp0C\nOBjUonJVneqmo7kObleik5Tqy4vfcWJC2cAJ6RcaZbSZodYaBcUMAmJCkB2kDFho\nUc3Ii9aDQQ7UxmNg8n2TdEW8eApcWtkyDwkctz655U67sHBneCC8AT4k8wLdCJO+\nXOd/6nHGzLuNjB/4k4OlK6FCBPwzbi4I3DK2wJJqlS7BIs6rT7Yy10AsX5wUlUMH\n5Znwe1qqUFhMhWNW8LILVZ3Hj52dNUPovRcq/oSsSa71IYb04UbkHdwiXaQml1HC\nYJgYmyWY8P/kkgOEu8AIJ+8Exk4tAhRTO9DRWmak/P74oKEtJGXvH8g1b5dMKDOG\nOldadGBBAgMBAAECggEAO6R8RHB5Paw9Rw6HBs7kFKgKDAjcLWhky1kGSKP6bbI6\nsDXQ7fdKwIH3kRuQkfiq0eKd6jlGX2f5GsAIyWm9sPj0QtUDREiJQGCoOs9f7Hk1\nEx8VKGCc+WaqZx8UvZWQV2Hr/eLneJqixD6HPbQZMlmfHt3t/dSk3Os/cIVrOLiW\nxqxjHUG+W3TL4TY8cPSzS7SyEpx7bj/Lw55j5NTlHCWVTCwqv6bAGcSvR7j7/2U7\nt3myg2ghYAGJls2x7VElUmVqmQbt6eYv4fWAaOT9wT/exmBjJMIkkBmMQ1lewXws\nDV6H62EyDoGoIvDCZOH7vum/8MiJnfQgPyAkQ9UXSwKBgQDTR6JEDp6Q3q7yJp1C\nK7j4ARY2mimACSbtjPMu0Kslu6koLSGElpib3P6Kz0xVb8lTWtZ5AYEj4Hn36I+H\nWB+Z60o+ZADXN4wNJjwwPjYV5otUoLeXjgu8dsX974DkBiQLuFicSq1sXytnoIQV\nqgEH7Ewy7oTp9vgm+DVxLbY0XwKBgQDSNcv2wx6+ZfP1axC96remtZpoZ1oToNC0\nGfYt49ESKyfQ/nCLtiQEBJ6zs/dcmkgs4WXzTgp3msRFpJ5Ol5GceqCwqaA4SCEr\n5SWT1onSlOM7/ZHDyZZHumB0bu4dyADwO3WsnbS3VDlJzPDNPH51OzH+qDC0XElS\nhu+bdjavXwKBgQCvA9fWqIWRW+Vvka0S80T1q3DLKkjWVr54aRnI3fHn/9vP/BKX\n0mf4NMhmE/IXk9Ihyk1/T0+6eGiQg4ThiI4k4lNN+2j23nyVJ+cTz3TeD2u7Xqa2\nVGREad74yzzppmyViM9eKD4gV3WNEdpYV8si1QsJ5asUZBCLt3ANoOAd4QKBgEcB\n+SYf/zCdy+zo/7zHnsXnroL59omO1zEfW/Ngc21Juqd0a5wmKMBatylI75QOYbcX\nZJLtl8eTNh24X+l4da2AFuvWQNMCOoJTY4AvBltmA+Rt4WFbpTIRmSd7mV/iAb8k\ntrlahIMxJjDx053gg28iUd8N/XXPfs0r26COLCbNAoGBAJZV2Tlk4etL3MbjBJl9\nn3ikaFDFwjoT1trB4dXLi1LLsi1WMPopHt3ImyQOT114dknremFKE+3ymL0x1km1\nrFSaJ8atoBhs949vn7bqVupdwKGXOzjFH3ffear1HwEX0kB3N0Xv7mGWIxc5qwFJ\nPd7NJfjXZx+AQrsq4ke4FfUk\n-----END PRIVATE KEY-----\n",
-  "client_email": "firebase-adminsdk-f6sow@pech-tech.iam.gserviceaccount.com",
-  "client_id": "115727904019355387816",
-  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-  "token_uri": "https://oauth2.googleapis.com/token",
-  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/firebase-adminsdk-f6sow%40pech-tech.iam.gserviceaccount.com",
-  "universe_domain": "googleapis.com"
+  "type": "",
+  "project_id": "",
+  "private_key_id": "",
+  "private_key": "",
+  "client_email": "",
+  "client_id": "",
+  "auth_uri": "",
+  "token_uri": "",
+  "auth_provider_x509_cert_url": "",
+  "client_x509_cert_url": "",
+  "universe_domain": ""
 }
+
