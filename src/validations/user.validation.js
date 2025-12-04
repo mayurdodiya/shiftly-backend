@@ -72,6 +72,13 @@ const register = {
   }),
 };
 
+const adminLogin = {
+  body: Joi.object().keys({
+    email: Joi.string().required(),
+    password: Joi.string().required(),
+  }),
+};
+
 const updateFcm = {
   body: Joi.object().keys({
     fcmToken: Joi.string().required(),
@@ -167,4 +174,5 @@ module.exports = {
   changePassword,
   setCommissionPercentage,
   getAllUser,
+  adminLogin,
 };

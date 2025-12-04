@@ -140,7 +140,7 @@ module.exports = {
 
       const { skip, limit: pageLimit } = getPagination(page, limit);
 
-      let filterArr = [{ deletedAt: null }, { isActive: true }];
+      let filterArr = [{ deletedAt: null }, { isActive: true }, { status: APPLICATION_STATUS.PENDING }];
 
       if (search) {
         const reg = new RegExp(search, "i");

@@ -6,6 +6,25 @@ const { APPLICATION_STATUS, ROLE } = require("../utils/constant");
 // const sendOTP = require("../services/sms")
 
 module.exports = {
+  adminLogin: async (req, res) => {
+    try {
+      let reqBody = req.body;
+
+      let admin = await UserModel.findOne({ email: reqBody.email, role: ROLE.ADMIN, isActive: true, deletedAt: null });
+      if (!admin) return apiResponse.NOT_FOUND({ res, message: message.user_not_found });
+      if (reqBody.password !== process.env.ADMIN_PASSWORD) return apiResponse.BAD_REQUEST({ res, message: message.invalid_credentials });
+
+      const token = await generateToken({ userId: admin._id, email: reqBody.email });
+      admin = admin.toObject()
+      admin.token = token;
+
+      return apiResponse.OK({ res, message: message.login_successful, data: admin });
+    } catch (err) {
+      console.log(err)
+      return apiResponse.CATCH_ERROR({ res, message: message.something_went_wrong });
+    }
+  },
+
   register: async (req, res) => {
     try {
       let reqBody = req.body;
@@ -317,7 +336,7 @@ module.exports = {
 
   adminDashboardOverviewCount: async (req, res) => {
     try {
-      const [hospitalCount, employeeCount, refundReqCount, refundCompletedCount, completedReqCount, ongoingJobCount, totalRevenue] = await Promise.all([
+      const [hospitalCount, employeeCount, refundReqCount, refundCompletedCount, completedReqCount, ongoingJobCount, verifiedJobCount, totalRevenue] = await Promise.all([
         // total hospital count
         UserModel.countDocuments({ role: ROLE.HOSPITAL }),
         // total employee count
@@ -330,6 +349,8 @@ module.exports = {
         JobPostModel.countDocuments({ status: APPLICATION_STATUS.COMPLETED }),
         // total ongoing req count
         JobPostModel.countDocuments({ status: APPLICATION_STATUS.START_WORKING }),
+        // total verified req count
+        JobPostModel.countDocuments({ status: APPLICATION_STATUS.VERIFIED }),
         // total revenue
         JobPostModel.aggregate([
           {
@@ -346,7 +367,7 @@ module.exports = {
         ]),
       ])
       const obj = {
-        hospitalCount, employeeCount, refundReqCount, refundCompletedCount, completedReqCount, ongoingJobCount, totalRevenue: totalRevenue[0].totalAdminFee
+        hospitalCount, employeeCount, refundReqCount, refundCompletedCount, completedReqCount, ongoingJobCount, verifiedJobCount, totalRevenue: totalRevenue[0].totalAdminFee
       }
 
       return apiResponse.OK({ res, message: `Dashboard overview data ${message.data_get}`, data: obj, });

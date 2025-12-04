@@ -22,6 +22,9 @@ router.post("/signup", upload.single("file"), validate(userValidation.register),
 // upload single 
 router.post("/upload", upload.single("file"), utils.uploadImage);
 
+// login only for admin
+router.post("/login", validate(userValidation.adminLogin), userController.adminLogin);
+
 
 // ------------------------------- PUT routes ------------------------------------------
 // edit user
