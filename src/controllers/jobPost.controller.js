@@ -113,8 +113,16 @@ module.exports = {
       }
 
       const filterQuery = filterArr.length > 0 ? { $and: filterArr } : {};
-
-      const data = await JobPostModel.find(filterQuery).populate("recruiterId", "name email phone role").skip(skip).limit(pageLimit).sort({ createdAt: -1 });
+      const popupate = [
+        {
+          path: "recruiterId",
+          select: "name email phone role",
+        },
+        {
+          path: "hiredApplicantId",
+        },
+      ]
+      const data = await JobPostModel.find(filterQuery).populate(popupate).skip(skip).limit(pageLimit).sort({ createdAt: -1 });
 
       const totalCount = await JobPostModel.countDocuments(filterQuery);
 
@@ -129,6 +137,131 @@ module.exports = {
     } catch (err) {
       console.log("Error fetching job posts", err);
       return apiResponse.CATCH_ERROR({ res, message: message.something_went_wrong });
+    }
+  },
+
+  getAllJobPostWithApplicantAppliedFlag: async (req, res) => {
+    try {
+      const { user } = req; // logged-in user (employee)
+      const employeeId = user._id;
+
+      const { recruiterId, search, status, city, state, minExperience, maxExperience, minSalary, maxSalary, startDate, endDate, page, limit } = req.query;
+      const { skip, limit: pageLimit } = getPagination(page, limit);
+
+      let filterArr = [{ isActive: true }];
+
+      if (search) {
+        const reg = new RegExp(search, "i");
+        filterArr.push({
+          $or: [
+            { title: reg },
+            { description: reg },
+            { skills: reg },
+            { "location.city": reg },
+            { "location.state": reg }
+          ]
+        });
+      }
+
+      if (status) filterArr.push({ status });
+      if (recruiterId) filterArr.push({ recruiterId: new mongoose.Types.ObjectId(recruiterId) });
+      if (city) filterArr.push({ "location.city": city });
+      if (state) filterArr.push({ "location.state": state });
+
+      if (minExperience) filterArr.push({ "experience.min": { $gte: Number(minExperience) } });
+      if (maxExperience) filterArr.push({ "experience.max": { $lte: Number(maxExperience) } });
+
+      if (minSalary) filterArr.push({ salary: { $gte: Number(minSalary) } });
+      if (maxSalary) filterArr.push({ salary: { $lte: Number(maxSalary) } });
+
+      if (startDate) filterArr.push({ jobStartDate: { $gte: new Date(startDate) } });
+      if (endDate) filterArr.push({ jobStartDate: { $lte: new Date(endDate) } });
+
+      const matchQuery = filterArr.length ? { $and: filterArr } : {};
+
+      const data = await JobPostModel.aggregate([
+        { $match: matchQuery },
+        {
+          $lookup: {
+            from: "jobApplication",
+            let: { jobId: "$_id", empId: new mongoose.Types.ObjectId(employeeId) },
+            pipeline: [
+              {
+                $match: {
+                  $expr: {
+                    $and: [
+                      { $eq: ["$jobPostId", "$$jobId"] },
+                      { $eq: ["$applicantId", "$$empId"] },
+                      { $eq: ["$isActive", true] }
+                    ]
+                  }
+                }
+              }
+            ],
+            as: "appliedData"
+          }
+        },
+        {
+          $addFields: {
+            isApplied: {
+              $cond: [{ $gt: [{ $size: "$appliedData" }, 0] }, true, false]
+            }
+          }
+        },
+        {
+          $project: {
+            appliedData: 0
+          }
+        },
+        {
+          $lookup: {
+            from: "users",
+            localField: "recruiterId",
+            foreignField: "_id",
+            as: "recruiter"
+          }
+        },
+        { $unwind: "$recruiter" },
+        {
+          $lookup: {
+            from: "users",
+            localField: "hiredApplicantId",
+            foreignField: "_id",
+            as: "hiredApplicantId"
+          }
+        },
+        {
+          $unwind: {
+            path: "$hiredApplicantId",
+            preserveNullAndEmptyArrays: true
+          }
+        },
+        { $sort: { createdAt: -1 } },
+        { $skip: skip },
+        { $limit: pageLimit }
+      ]);
+
+      const totalCount = await JobPostModel.countDocuments(matchQuery);
+
+      const response = pagingData({
+        data,
+        total: totalCount,
+        page,
+        limit: pageLimit
+      });
+
+      return apiResponse.OK({
+        res,
+        message: "Job Post Retrieved Successfully",
+        data: response
+      });
+
+    } catch (err) {
+      console.log("Error fetching job posts", err);
+      return apiResponse.CATCH_ERROR({
+        res,
+        message: "Something went wrong"
+      });
     }
   },
 
@@ -235,8 +368,16 @@ module.exports = {
   getJobPostDetail: async (req, res) => {
     try {
       const { id } = req.params;
-
-      const jobPost = await JobPostModel.findOne({ _id: id, isActive: true }).populate("recruiterId", "name email phone role");
+      const popupate = [
+        {
+          path: "recruiterId",
+          select: "name email phone role",
+        },
+        {
+          path: "hiredApplicantId",
+        },
+      ]
+      const jobPost = await JobPostModel.findOne({ _id: id, isActive: true }).populate(popupate);
 
       if (!jobPost) return apiResponse.NOT_FOUND({ res, message: "Job post not found" });
 

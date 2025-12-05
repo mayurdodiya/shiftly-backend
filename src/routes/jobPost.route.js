@@ -46,6 +46,9 @@ router.get("/list-applied-job", auth({ usersAllowed: [ROLE.HOSPITAL] }), validat
 // list of all jobs
 router.get("/list", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.EMPLOYEE] }), validate(jobPostValidation.getAllJobPost), postController.getAllJobPost);
 
+// list of all jobs
+router.get("/getAllJobPostWithApplicantAppliedFlag", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.EMPLOYEE] }), validate(jobPostValidation.getAllJobPost), postController.getAllJobPostWithApplicantAppliedFlag);
+
 // get job post all status overview count (ongoing, upcoming, completed, expired, verified)
 router.get("/status-overview", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.EMPLOYEE] }), /* validate(jobPostValidation.jobpostStatusOverviewCount), */ postController.jobpostStatusOverviewCount);
 

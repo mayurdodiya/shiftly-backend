@@ -33,43 +33,60 @@ const addJobPost = {
       state: Joi.string().trim().lowercase().required(),
       country: Joi.string().trim().lowercase().default("india"),
       address: Joi.string().trim().lowercase().allow("", null),
-    }).required(),
+      latitude: Joi.number()
+        .min(-90)
+        .max(90)
+        .default(0)
+        .messages({
+          "number.min": "Latitude must be >= -90",
+          "number.max": "Latitude must be <= 90",
+        }).required(),
+      longitude: Joi.number()
+        .min(-180)
+        .max(180)
+        .default(0)
+        .messages({
+          "number.min": "Longitude must be >= -180",
+          "number.max": "Longitude must be <= 180",
+        }).required(),
+    }),
 
-    salary: Joi.number().required(),
+  salary: Joi.number().required(),
 
-    shiftStartTime: Joi.string()
-      .trim()
-      .lowercase()
-      .pattern(/^\d{2}:\d{2}$/)
-      .required(),
+  shiftStartTime: Joi.string()
+    .trim()
+    .lowercase()
+    .pattern(/^\d{2}:\d{2}$/)
+    .required(),
 
-    shiftEndTime: Joi.string()
-      .trim()
-      .lowercase()
-      .pattern(/^\d{2}:\d{2}$/)
-      .required(),
+  shiftEndTime: Joi.string()
+    .trim()
+    .lowercase()
+    .pattern(/^\d{2}:\d{2}$/)
+    .required(),
 
-    jobStartDate: Joi.string()
-      .trim()
-      .lowercase()
-      .pattern(dateFormate)
-      .required()
-      .messages({
-        "string.pattern.base": "jobStartDate must be in YYYY-MM-DD format only",
-      }),
+  jobStartDate: Joi.string()
+    .trim()
+    .lowercase()
+    .pattern(dateFormate)
+    .required()
+    .messages({
+      "string.pattern.base": "jobStartDate must be in YYYY-MM-DD format only",
+    }),
 
-    jobEndDate: Joi.string()
-      .trim()
-      .lowercase()
-      .pattern(dateFormate)
-      .required()
-      .messages({
-        "string.pattern.base": "jobEndDate must be in YYYY-MM-DD format only",
-      }),
+  jobEndDate: Joi.string()
+    .trim()
+    .lowercase()
+    .pattern(dateFormate)
+    .required()
+    .messages({
+      "string.pattern.base": "jobEndDate must be in YYYY-MM-DD format only",
+    }),
 
-    isActive: Joi.boolean().default(true),
-    transactionId: Joi.string().required(),
-  }),
+  isActive: Joi.boolean().default(true),
+  transactionId: Joi.string().required(),
+
+}),
 };
 
 // const editJobPost = {

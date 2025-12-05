@@ -32,6 +32,8 @@ const jobPostSchema = mongoose.Schema(
       state: { type: String, trim: true },
       country: { type: String, trim: true, default: "India" },
       address: { type: String },
+      latitude: { type: Number, default: 0 },
+      longitude: { type: Number, default: 0 },
     },
     salary: {
       type: Number,
