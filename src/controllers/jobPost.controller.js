@@ -610,7 +610,7 @@ module.exports = {
     }
   },
 
-  getAllMyAppliedJobApplication: async (req, res) => {
+  getAllMyAppliedJobApplicationOLD: async (req, res) => {
     try {
       const { jobPostId, search, minExperience, maxExperience, skill, phone, profession, isActive, startDate, endDate, page, limit, sortField, sortOrder } = req.query;
       const applicantId = req.user._id;
@@ -677,19 +677,6 @@ module.exports = {
       const finalQuery = filter.length ? { $and: filter } : {};
       console.log(finalQuery, "-----------");
 
-      // === Populate with applicant + jobPost ===
-      // const data = await JobApplicationModel.find(finalQuery)
-      //   .select("jobPostId applicantId isActive createdAt")
-      //   .populate("applicantId", "name phone profession skill experience resumeUrl")
-      //   .populate({
-      //     path: "jobPostId",
-      //     select: "title skills employeeSalary experience location status",
-      //     match: { status: APPLICATION_STATUS.PENDING },
-      //   })
-      //   .skip(skip)
-      //   .limit(pageLimit)
-      //   .sort({ [sortField]: sortOrder === "asc" ? 1 : -1 });
-
       const data = await JobApplicationModel.aggregate([
         { $match: finalQuery },
 
@@ -749,8 +736,240 @@ module.exports = {
         { $limit: pageLimit }
       ]);
 
-
       const totalCount = await JobApplicationModel.countDocuments(finalQuery);
+
+      const response = pagingData({
+        data,
+        total: totalCount,
+        page,
+        limit: pageLimit,
+      });
+
+      return apiResponse.OK({
+        res,
+        message: "Job Applications fetched successfully",
+        data: response,
+      });
+    } catch (err) {
+      console.log("Error fetching applications :", err);
+      return apiResponse.CATCH_ERROR({
+        res,
+        message: "Something went wrong",
+      });
+    }
+  },
+  getAllMyAppliedJobApplication: async (req, res) => {
+    try {
+      const { jobPostId, search, minExperience, maxExperience, skill, phone, profession, isActive, startDate, endDate, page, limit, sortField, sortOrder } = req.query;
+      const applicantId = req.user._id;
+
+      const { skip, limit: pageLimit } = getPagination(page, limit);
+
+      let filter = [];
+
+      // Applicant filter
+      if (applicantId) {
+        filter.push({ applicantId: applicantId });
+      }
+
+      // Job Post filter
+      if (jobPostId) {
+        filter.push({ jobPostId });
+      }
+
+      filter.push({ isActive: true });
+      // if (isActive == true) {
+      // } else if (isActive == false) {
+      //   filter.push({ isActive: false });
+      // }
+
+      // Date range filter (application created date)
+      if (startDate) {
+        filter.push({ createdAt: { $gte: new Date(startDate) } });
+      }
+      if (endDate) {
+        filter.push({ createdAt: { $lte: new Date(endDate) } });
+      }
+
+      // Search text filter (name, phone, job title)
+      if (search) {
+        const reg = new RegExp(search, "i");
+        filter.push({
+          $or: [{ "applicant.name": reg }, { "applicant.phone": reg }, { "jobPost.title": reg }, { "jobPost.skills": { $in: [reg] } }],
+        });
+      }
+
+      // Skill filter
+      if (skill) {
+        filter.push({ "applicant.skill": { $in: [skill] } });
+      }
+
+      // Phone filter
+      if (phone) {
+        filter.push({ "applicant.phone": phone });
+      }
+
+      // Profession filter
+      if (profession) {
+        filter.push({ "applicant.profession": profession });
+      }
+
+      // Experience filter
+      if (minExperience) {
+        filter.push({ "applicant.experience": { $gte: Number(minExperience) } });
+      }
+      if (maxExperience) {
+        filter.push({ "applicant.experience": { $lte: Number(maxExperience) } });
+      }
+
+      const finalQuery = filter.length ? { $and: filter } : {};
+      console.log(finalQuery, "-----------");
+
+      const data = await JobApplicationModel.aggregate([
+        { $match: finalQuery },
+
+        // Join jobPost
+        {
+          $lookup: {
+            from: "jobPost",
+            localField: "jobPostId",
+            foreignField: "_id",
+            as: "jobPost",
+          }
+        },
+        { $unwind: "$jobPost" },
+
+        // Filter only pending jobPosts
+        {
+          $match: {
+            "jobPost.status": APPLICATION_STATUS.PENDING
+          }
+        },
+
+        // Populate applicant
+        {
+          $lookup: {
+            from: "users",
+            localField: "applicantId",
+            foreignField: "_id",
+            as: "applicant"
+          }
+        },
+        { $unwind: "$applicant" },
+
+        // Flatten jobPost fields
+        {
+          $addFields: {
+            recruiterId: "$jobPost.recruiterId",
+            title: "$jobPost.title",
+            description: "$jobPost.description",
+            skills: "$jobPost.skills",
+            experience: "$jobPost.experience",
+            location: "$jobPost.location",
+            salary: "$jobPost.salary",
+            adminFee: "$jobPost.adminFee",
+            employeeSalary: "$jobPost.employeeSalary",
+            shiftStartTime: "$jobPost.shiftStartTime",
+            shiftEndTime: "$jobPost.shiftEndTime",
+            jobStartDate: "$jobPost.jobStartDate",
+            jobEndDate: "$jobPost.jobEndDate",
+            totalDays: "$jobPost.totalDays",
+            hiredApplicantId: "$jobPost.hiredApplicantId",
+            status: "$jobPost.status",
+            recruiterPaymentId: "$jobPost.recruiterPaymentId",
+            recruiterRefundPaymentId: "$jobPost.recruiterRefundPaymentId",
+            employeePaymentId: "$jobPost.employeePaymentId",
+            paymentStatus: "$jobPost.paymentStatus",
+            expireAt: "$jobPost.expireAt",
+            jobPostCreatedAt: "$jobPost.createdAt",
+            jobPostUpdatedAt: "$jobPost.updatedAt"
+          }
+        },
+
+        // Select fields
+        {
+          $project: {
+            // jobPost: 0, // remove nested jobPost
+            applicant: {
+              name: 1,
+              phone: 1,
+              profession: 1,
+              skill: 1,
+              experience: 1,
+              resumeUrl: 1,
+            },
+            isActive: 1,
+            createdAt: 1,
+            recruiterId: 1,
+            title: 1,
+            description: 1,
+            skills: 1,
+            experience: 1,
+            location: 1,
+            salary: 1,
+            adminFee: 1,
+            employeeSalary: 1,
+            shiftStartTime: 1,
+            shiftEndTime: 1,
+            jobStartDate: 1,
+            jobEndDate: 1,
+            totalDays: 1,
+            hiredApplicantId: 1,
+            status: 1,
+            recruiterPaymentId: 1,
+            recruiterRefundPaymentId: 1,
+            employeePaymentId: 1,
+            paymentStatus: 1,
+            expireAt: 1,
+            jobPostCreatedAt: 1,
+            jobPostUpdatedAt: 1
+          }
+        },
+
+        // Sorting
+        { $sort: { [sortField]: sortOrder === "asc" ? 1 : -1 } },
+
+        // Pagination
+        { $skip: skip },
+        { $limit: pageLimit }
+      ]);
+
+      // ============================
+      // GET TOTAL COUNT (REAL COUNT)
+      // ============================
+      const totalResult = await JobApplicationModel.aggregate([
+        { $match: finalQuery },
+
+        {
+          $lookup: {
+            from: "jobPost",
+            localField: "jobPostId",
+            foreignField: "_id",
+            as: "jobPost",
+          }
+        },
+        { $unwind: "$jobPost" },
+
+        {
+          $match: {
+            "jobPost.status": APPLICATION_STATUS.PENDING
+          }
+        },
+
+        {
+          $lookup: {
+            from: "users",
+            localField: "applicantId",
+            foreignField: "_id",
+            as: "applicant"
+          }
+        },
+        { $unwind: "$applicant" },
+
+        { $count: "totalRecords" }
+      ]);
+
+      const totalCount = totalResult.length ? totalResult[0].totalRecords : 0;
 
       const response = pagingData({
         data,
@@ -815,8 +1034,17 @@ module.exports = {
       }
 
       const filterQuery = filterArr.length > 0 ? { $and: filterArr } : {};
-
-      const data = await JobPostModel.find(filterQuery).populate("recruiterId", "name email phone role").skip(skip).limit(pageLimit).sort({ jobStartDate: -1 });
+      const popupate = [
+        {
+          path: "recruiterId",
+          select: "name email phone role",
+        },
+        {
+          path: "hiredApplicantId",
+        },
+      ]
+      // const data = await JobPostModel.find(filterQuery).populate("recruiterId", "name email phone role").skip(skip).limit(pageLimit).sort({ jobStartDate: -1 });
+      const data = await JobPostModel.find(filterQuery).populate(popupate).skip(skip).limit(pageLimit).sort({ jobStartDate: -1 });
 
       const totalCount = await JobPostModel.countDocuments(filterQuery);
 
@@ -877,8 +1105,17 @@ module.exports = {
 
       const filterQuery = filterArr.length > 0 ? { $and: filterArr } : {};
       console.log(filterQuery, "--------------filterQuery");
-
-      const data = await JobPostModel.find(filterQuery).populate("recruiterId", "name email phone role").skip(skip).limit(pageLimit).sort({ jobStartDate: -1 });
+      const popupate = [
+        {
+          path: "recruiterId",
+          select: "name email phone role",
+        },
+        {
+          path: "hiredApplicantId",
+        },
+      ]
+      // const data = await JobPostModel.find(filterQuery).populate("recruiterId", "name email phone role").skip(skip).limit(pageLimit).sort({ jobStartDate: -1 });
+      const data = await JobPostModel.find(filterQuery).populate(popupate).skip(skip).limit(pageLimit).sort({ jobStartDate: -1 });
 
       const totalCount = await JobPostModel.countDocuments(filterQuery);
 
@@ -933,7 +1170,17 @@ module.exports = {
       }
 
       const filterQuery = filterArr.length > 0 ? { $and: filterArr } : {};
-      const data = await JobPostModel.find(filterQuery).populate("recruiterId", "name email phone role").skip(skip).limit(pageLimit).sort({ jobStartDate: -1 });
+      const popupate = [
+        {
+          path: "recruiterId",
+          select: "name email phone role",
+        },
+        {
+          path: "hiredApplicantId",
+        },
+      ]
+      // const data = await JobPostModel.find(filterQuery).populate("recruiterId", "name email phone role").skip(skip).limit(pageLimit).sort({ jobStartDate: -1 });
+      const data = await JobPostModel.find(filterQuery).populate(popupate).skip(skip).limit(pageLimit).sort({ jobStartDate: -1 });
       const totalCount = await JobPostModel.countDocuments(filterQuery);
 
       const response = pagingData({
@@ -987,7 +1234,17 @@ module.exports = {
       }
 
       const filterQuery = filterArr.length > 0 ? { $and: filterArr } : {};
-      const data = await JobPostModel.find(filterQuery).populate("recruiterId", "name email phone role").skip(skip).limit(pageLimit).sort({ jobStartDate: -1 });
+      const popupate = [
+        {
+          path: "recruiterId",
+          select: "name email phone role",
+        },
+        {
+          path: "hiredApplicantId",
+        },
+      ]
+      // const data = await JobPostModel.find(filterQuery).populate("recruiterId", "name email phone role").skip(skip).limit(pageLimit).sort({ jobStartDate: -1 });
+      const data = await JobPostModel.find(filterQuery).populate(popupate).skip(skip).limit(pageLimit).sort({ jobStartDate: -1 });
       const totalCount = await JobPostModel.countDocuments(filterQuery);
 
       const response = pagingData({
@@ -1042,7 +1299,17 @@ module.exports = {
       }
 
       const filterQuery = filterArr.length > 0 ? { $and: filterArr } : {};
-      const data = await JobPostModel.find(filterQuery).populate("recruiterId", "name email phone role").skip(skip).limit(pageLimit).sort({ jobStartDate: -1 });
+      const popupate = [
+        {
+          path: "recruiterId",
+          select: "name email phone role",
+        },
+        {
+          path: "hiredApplicantId",
+        },
+      ]
+      // const data = await JobPostModel.find(filterQuery).populate("recruiterId", "name email phone role").skip(skip).limit(pageLimit).sort({ jobStartDate: -1 });
+      const data = await JobPostModel.find(filterQuery).populate(popupate).skip(skip).limit(pageLimit).sort({ jobStartDate: -1 });
       const totalCount = await JobPostModel.countDocuments(filterQuery);
 
       const response = pagingData({
@@ -1095,7 +1362,17 @@ module.exports = {
       }
 
       const filterQuery = filterArr.length > 0 ? { $and: filterArr } : {};
-      const data = await JobPostModel.find(filterQuery).populate("recruiterId", "name email phone role").skip(skip).limit(pageLimit).sort({ jobStartDate: -1 });
+      const popupate = [
+        {
+          path: "recruiterId",
+          select: "name email phone role",
+        },
+        {
+          path: "hiredApplicantId",
+        },
+      ]
+      // const data = await JobPostModel.find(filterQuery).populate("recruiterId", "name email phone role").skip(skip).limit(pageLimit).sort({ jobStartDate: -1 });
+      const data = await JobPostModel.find(filterQuery).populate(popupate).skip(skip).limit(pageLimit).sort({ jobStartDate: -1 });
       const totalCount = await JobPostModel.countDocuments(filterQuery);
 
       const response = pagingData({
@@ -1148,7 +1425,17 @@ module.exports = {
       }
 
       const filterQuery = filterArr.length > 0 ? { $and: filterArr } : {};
-      const data = await JobPostModel.find(filterQuery).populate("recruiterId", "name email phone role").skip(skip).limit(pageLimit).sort({ jobStartDate: -1 });
+      const popupate = [
+        {
+          path: "recruiterId",
+          select: "name email phone role",
+        },
+        {
+          path: "hiredApplicantId",
+        },
+      ]
+      // const data = await JobPostModel.find(filterQuery).populate("recruiterId", "name email phone role").skip(skip).limit(pageLimit).sort({ jobStartDate: -1 });
+      const data = await JobPostModel.find(filterQuery).populate(popupate).skip(skip).limit(pageLimit).sort({ jobStartDate: -1 });
       const totalCount = await JobPostModel.countDocuments(filterQuery);
 
       const response = pagingData({
