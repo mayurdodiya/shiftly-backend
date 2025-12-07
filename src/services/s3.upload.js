@@ -12,7 +12,7 @@ aws.config.update({
 });
 
 const s3 = new aws.S3();
-
+// working code
 const upload = multer({
   storage: multerS3({
     s3: s3,
@@ -29,6 +29,8 @@ const upload = multer({
   limits: { files: 10 },
 });
 
+
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "uploads/");
@@ -40,4 +42,21 @@ const storage = multer.diskStorage({
 
 const localUpload = multer({ storage: storage });
 
+    // trying for resume preview
+    // const upload = multer({
+    //   storage: multerS3({
+    //     s3: s3,
+    //     bucket: process.env.BUCKET,
+    //     acl: "public-read",
+    //     contentType: multerS3.AUTO_CONTENT_TYPE,
+    //     metadata: function (req, file, cb) {
+    //       cb(null, { fieldName: file.originalname });
+    //     },
+    //     key: function (req, file, cb) {
+    //       const ext = file.mimetype.split("/")[1];
+    //       cb(null, "upload-" + Date.now() + "." + ext);
+    //     },
+    //   }),
+    //   limits: { files: 10 },
+    // });
 module.exports = { upload, localUpload };

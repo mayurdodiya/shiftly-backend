@@ -6,7 +6,7 @@ const { Types } = mongoose;
 const moment = require("moment");
 const { getPagination, pagingData } = require("../utils/utils");
 const { APPLICATION_STATUS, ROLE } = require("../utils/constant");
-// const { sendNotification } = require('./../services/send-noification')
+const { sendNotification } = require('./../services/send-noification')
 
 
 module.exports = {
@@ -218,10 +218,10 @@ module.exports = {
             from: "users",
             localField: "recruiterId",
             foreignField: "_id",
-            as: "recruiter"
+            as: "recruiterId"
           }
         },
-        { $unwind: "$recruiter" },
+        { $unwind: "$recruiterId" },
         {
           $lookup: {
             from: "users",
@@ -467,15 +467,13 @@ module.exports = {
       const overlappingHiredApplication = await JobPostModel.findOne({
         hiredApplicantId: user._id,
         isActive: true,
+        status: { $nin: [APPLICATION_STATUS.PENDING] },
         jobStartDate: { $lte: newEnd }, // existing.start <= new.end
         jobEndDate: { $gte: newStart }, // existing.end >= new.start
       });
 
       if (overlappingHiredApplication) {
-        return apiResponse.BAD_REQUEST({
-          res,
-          message: "You already have a hired job overlapping this date range. You can apply only before or after those dates.",
-        });
+        return apiResponse.BAD_REQUEST({ res, message: "You have another hired job in this period, find onther dates jobs.", });
       }
 
       // Check already applied for same job
@@ -494,7 +492,7 @@ module.exports = {
       const title = "New Job Application"
       const msg = `${user.name} applied for the "${jobPost.title}" position.`
       await Promise.all([
-        // sendNotification(jobPost.recruiterId.fcmToken, title, msg),
+        sendNotification(jobPost.recruiterId.fcmToken, title, msg),
         NotificationModel.create({ userId: jobPost.recruiterId._id, title: title, body: msg, })
       ])
 
@@ -577,7 +575,6 @@ module.exports = {
       }
 
       const finalQuery = filter.length ? { $and: filter } : {};
-      console.log(finalQuery, "-----------");
 
       // === Populate with applicant + jobPost ===
       const data = await JobApplicationModel.find(finalQuery)
@@ -675,7 +672,6 @@ module.exports = {
       }
 
       const finalQuery = filter.length ? { $and: filter } : {};
-      console.log(finalQuery, "-----------");
 
       const data = await JobApplicationModel.aggregate([
         { $match: finalQuery },
@@ -823,7 +819,6 @@ module.exports = {
       }
 
       const finalQuery = filter.length ? { $and: filter } : {};
-      console.log(finalQuery, "-----------");
 
       const data = await JobApplicationModel.aggregate([
         { $match: finalQuery },
@@ -835,6 +830,19 @@ module.exports = {
             localField: "jobPostId",
             foreignField: "_id",
             as: "jobPost",
+            pipeline: [
+              {
+                $lookup: {
+                  from: "users",
+                  localField: "recruiterId",
+                  foreignField: "_id",
+                  as: "recruiterId"
+                }
+              },
+              {
+                $unwind: "$recruiterId"
+              }
+            ]
           }
         },
         { $unwind: "$jobPost" },
@@ -1104,7 +1112,6 @@ module.exports = {
       }
 
       const filterQuery = filterArr.length > 0 ? { $and: filterArr } : {};
-      console.log(filterQuery, "--------------filterQuery");
       const popupate = [
         {
           path: "recruiterId",
@@ -1269,7 +1276,18 @@ module.exports = {
       const { skip, limit: pageLimit } = getPagination(page, limit);
 
       // let filterArr = [{ deletedAt: null, isActive: true, status: APPLICATION_STATUS.EXPIRED }];
-      let filterArr = [{ deletedAt: null, isActive: true, status: APPLICATION_STATUS.PENDING, expireAt: { $lte: new Date() } }];
+      let filterArr = [
+        { deletedAt: null, isActive: true },
+        // status: APPLICATION_STATUS.PENDING,
+        {
+          $or: [
+            { status: APPLICATION_STATUS.REFUND_REQUEST },
+            { status: APPLICATION_STATUS.REFUND_COMPLETED },
+            { status: APPLICATION_STATUS.PENDING },
+          ]
+        },
+        { expireAt: { $lte: new Date() } }
+      ];
 
       // Search (title, description, skills)
       if (search) {
@@ -1514,7 +1532,7 @@ module.exports = {
       const title = "Applicant Arriving Soon"
       const msg = `${user.name} will arrive at your hospital in a few minutes.`
       await Promise.all([
-        // sendNotification(job.recruiterId.fcmToken, title, msg),
+        sendNotification(job.recruiterId.fcmToken, title, msg),
         NotificationModel.create({ userId: job.recruiterId._id, title: title, body: msg, })
       ])
 
@@ -1544,7 +1562,7 @@ module.exports = {
       const msg = `${user.name} has completed their duty at your hospital.`
 
       await Promise.all([
-        // sendNotification(job.recruiterId.fcmToken, title, msg),
+        sendNotification(job.recruiterId.fcmToken, title, msg),
         NotificationModel.create({ userId: job.recruiterId._id, title: title, body: msg, })
       ])
 
@@ -1573,7 +1591,7 @@ module.exports = {
       const title = "Work Approved"
       const msg = `Your work has been verified by ${user.name}.`
       await Promise.all([
-        // sendNotification(job.hiredApplicantId.fcmToken, title, msg),
+        sendNotification(job.hiredApplicantId.fcmToken, title, msg),
         NotificationModel.create({ userId: job.recruiterId._id, title: title, body: msg, })
       ])
 
@@ -1635,11 +1653,9 @@ module.exports = {
     try {
       const applicationId = req.params.applicationId;
       const { user } = req;
-      console.log(user, '-----user')
 
       // Check if application exists and active
       const application = await JobApplicationModel.findOne({ _id: applicationId, isActive: true }).populate("applicantId");
-      console.log(application.applicantId.fcmToken, '-----------application')
 
       if (!application) return apiResponse.NOT_FOUND({ res, message: message.application_not_found });
 
@@ -1655,8 +1671,8 @@ module.exports = {
       const msg = `Your work has been verified by ${user.name}.`
 
       await Promise.all([
-        // sendNotification(application.applicantId.fcmToken, title, msg),
-        NotificationModel.create({ userId: job.recruiterId._id, title: title, body: msg, })
+        sendNotification(application.applicantId.fcmToken, title, msg),
+        NotificationModel.create({ userId: user._id, title: title, body: msg, })
       ])
 
       return apiResponse.OK({ res, message: message.application_status_updated, data: application });
@@ -1721,7 +1737,7 @@ module.exports = {
       const title = "Refund Credited"
       const msg = `${jobPost.recruiterId.name}'s refund for ${jobPost.title} post has been successfully credited. Request ID: ${jobPost._id}.`
       await Promise.all([
-        // sendNotification(jobPost.recruiterId.fcmToken, title, msg),
+        sendNotification(jobPost.recruiterId.fcmToken, title, msg),
         NotificationModel.create({ userId: jobPost.recruiterId._id, title: title, body: msg, })
       ])
       return apiResponse.OK({ res, message: msg });

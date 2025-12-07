@@ -3,6 +3,16 @@ const jwt = require("jsonwebtoken");
 const apiResponse = require("./api.response");
 const messages = require("../json/message.json");
 
+const aws = require("aws-sdk");
+
+aws.config.update({
+  secretAccessKey: process.env.SECRET_KEY,
+  accessKeyId: process.env.ACCESSKEYID,
+  region: process.env.REGION,
+});
+
+const s3 = new aws.S3();
+
 module.exports = {
   hashPassword: async ({ password }) => {
     const hash = await bcrypt.hash(password, 10);
@@ -15,7 +25,6 @@ module.exports = {
   },
 
   decodeToken: ({ token }) => {
-    console.log(token,'---------------token 1')
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     return decoded;
   },
@@ -74,6 +83,9 @@ module.exports = {
           res,
           message: messages.image_required,
         });
+      const previewUrl = module.exports.getPreSignUrl(req.file.key);
+      console.log(previewUrl, '----------------------------previewUrl');
+
       return apiResponse.OK({
         res,
         message: messages.success,
@@ -83,4 +95,11 @@ module.exports = {
       return apiResponse.CATCH_ERROR({ res, message: error.message });
     }
   },
+  getPreSignUrl: (key) => {
+    return s3.getSignedUrl("getObject", {
+      Bucket: process.env.BUCKET,
+      Key: key,
+      Expires: 60 * 60 * 24 * 7, // 7 days
+    });
+  }
 };

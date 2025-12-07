@@ -9,3 +9,5 @@ router.use("/job-post", require("./jobPost.route.js"));
 router.use("/notification", require("./notification.route.js"));
 
 module.exports = router;
+
+

@@ -17,6 +17,10 @@ const jobPostSchema = mongoose.Schema(
       type: String,
       trim: true,
     },
+    profession: {
+      type: String,
+      trim: true,
+    },
     skills: [
       {
         type: String,

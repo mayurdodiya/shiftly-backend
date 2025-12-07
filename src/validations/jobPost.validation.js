@@ -10,7 +10,8 @@ const objectId = (label = "id") =>
   });
 
 // const dateFormate = "/^(?:(?:31-(?:01|03|05|07|08|10|12))|(?:29|30-(?:01|03|04|05|06|07|08|09|10|11|12))|(?:29-02-(?:\d\d(?:0[48]|[2468][048]|[13579][26])|(?:0[48]|[2468][048]|[13579][26])00))|(?:0[1-9]|1\d|2[0-8]-(?:01|02|03|04|05|06|07|08|09|10|11|12)))-\d{4}$/"
-const dateFormate = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
+const dateFormate = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;  //allow 2025-01-01 format
+// const dateFormate = /^\d{4}-(0?[1-9]|1[0-2])-(0?[1-9]|[12]\d|3[01])$/; // allow 2025-1-1 format
 
 
 
@@ -18,6 +19,7 @@ const dateFormate = /^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])$/;
 const addJobPost = {
   body: Joi.object().keys({
     title: Joi.string().trim().lowercase().required(),
+    profession: Joi.string().trim().lowercase().optional(),
 
     description: Joi.string().trim().lowercase().allow("", null),
 
