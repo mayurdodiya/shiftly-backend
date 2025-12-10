@@ -371,7 +371,6 @@ module.exports = {
       const popupate = [
         {
           path: "recruiterId",
-          select: "name email phone role",
         },
         {
           path: "hiredApplicantId",
