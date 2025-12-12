@@ -1270,7 +1270,7 @@ module.exports = {
   // view all expried jobs for hospital
   viewAllExpriedJobs: async (req, res) => {
     try {
-      const { applicantId, recruiterId, search, city, state, startDate, endDate, page, limit } = req.query;
+      const { applicantId, recruiterId, status, search, city, state, startDate, endDate, page, limit } = req.query;
 
       const { skip, limit: pageLimit } = getPagination(page, limit);
 
@@ -1296,6 +1296,7 @@ module.exports = {
         });
       }
 
+      if (status) filterArr.push({ status });
       if (applicantId) filterArr.push({ hiredApplicantId: applicantId });
       if (recruiterId) filterArr.push({ recruiterId: recruiterId });
 

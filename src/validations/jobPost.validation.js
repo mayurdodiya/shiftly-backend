@@ -53,42 +53,42 @@ const addJobPost = {
         }).required(),
     }),
 
-  salary: Joi.number().required(),
+    salary: Joi.number().required(),
 
-  shiftStartTime: Joi.string()
-    .trim()
-    .lowercase()
-    .pattern(/^\d{2}:\d{2}$/)
-    .required(),
+    shiftStartTime: Joi.string()
+      .trim()
+      .lowercase()
+      .pattern(/^\d{2}:\d{2}$/)
+      .required(),
 
-  shiftEndTime: Joi.string()
-    .trim()
-    .lowercase()
-    .pattern(/^\d{2}:\d{2}$/)
-    .required(),
+    shiftEndTime: Joi.string()
+      .trim()
+      .lowercase()
+      .pattern(/^\d{2}:\d{2}$/)
+      .required(),
 
-  jobStartDate: Joi.string()
-    .trim()
-    .lowercase()
-    .pattern(dateFormate)
-    .required()
-    .messages({
-      "string.pattern.base": "jobStartDate must be in YYYY-MM-DD format only",
-    }),
+    jobStartDate: Joi.string()
+      .trim()
+      .lowercase()
+      .pattern(dateFormate)
+      .required()
+      .messages({
+        "string.pattern.base": "jobStartDate must be in YYYY-MM-DD format only",
+      }),
 
-  jobEndDate: Joi.string()
-    .trim()
-    .lowercase()
-    .pattern(dateFormate)
-    .required()
-    .messages({
-      "string.pattern.base": "jobEndDate must be in YYYY-MM-DD format only",
-    }),
+    jobEndDate: Joi.string()
+      .trim()
+      .lowercase()
+      .pattern(dateFormate)
+      .required()
+      .messages({
+        "string.pattern.base": "jobEndDate must be in YYYY-MM-DD format only",
+      }),
 
-  isActive: Joi.boolean().default(true),
-  transactionId: Joi.string().required(),
+    isActive: Joi.boolean().default(true),
+    transactionId: Joi.string().required(),
 
-}),
+  }),
 };
 
 // const editJobPost = {
@@ -357,6 +357,15 @@ const viewAllExpriedJobs = {
 
     page: Joi.number().min(1).default(1),
     limit: Joi.number().min(1).max(100).default(10),
+
+    status: Joi.string()
+      .valid(APPLICATION_STATUS.REFUND_REQUEST, APPLICATION_STATUS.REFUND_COMPLETED)
+      .optional()
+      .label("Application Status")
+      .messages({
+        "any.only": "{#label} must be one of the allowed statuses",
+        "any.required": "{#label} is required",
+      }),
   }),
 };
 

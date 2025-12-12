@@ -22,7 +22,7 @@ router.post("/payment", auth({ usersAllowed: [ROLE.HOSPITAL] }), /* validate(job
 router.post("/refund-request/:jobPostId", auth({ usersAllowed: [ROLE.HOSPITAL] }), validate(jobPostValidation.requestForRefund), postController.requestForRefund);
 
 // send refund to hospital (Admin only)
-router.post("/send-refund/:jobPostId", upload.single("file"), /* auth({ usersAllowed: [ROLE.ADMIN] }), */ validate(jobPostValidation.sendRefundToHospital), postController.sendRefundToHospital);
+router.post("/send-refund/:jobPostId", upload.single("file"), auth({ usersAllowed: [ROLE.ADMIN] }), validate(jobPostValidation.sendRefundToHospital), postController.sendRefundToHospital);
 
 
 // ------------------------------- PUT routes ------------------------------------------
