@@ -449,6 +449,85 @@ module.exports = {
     }
   },
 
+  getShiftFulfillmentRate: async (req, res) => {
+    try {
+      const currentYear = new Date().getFullYear();
+      const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+      const data = await JobPostModel.aggregate([
+        {
+          $match: {
+            createdAt: {
+              $gte: new Date(`${currentYear}-01-01`),
+              $lte: new Date(`${currentYear}-12-31`),
+            },
+            isActive: true,
+          },
+        },
+        {
+          $group: {
+            _id: { month: { $month: "$createdAt" } },
+            totalJobs: { $sum: 1 },
+            completedJobs: {
+              $sum: {
+                $cond: [
+                  { $eq: ["$status", APPLICATION_STATUS.VERIFIED] },
+                  1,
+                  0,
+                ],
+              },
+            },
+          },
+        },
+        {
+          $project: {
+            _id: 0,
+            month: "$_id.month",
+            rate: {
+              $cond: [
+                { $eq: ["$totalJobs", 0] },
+                0,
+                {
+                  $round: [
+                    {
+                      $multiply: [
+                        { $divide: ["$completedJobs", "$totalJobs"] },
+                        100,
+                      ],
+                    },
+                    0,
+                  ],
+                },
+              ],
+            },
+          },
+        },
+        { $sort: { month: 1 } },
+      ]);
+
+      // Fill missing months with 0%
+      const formattedData = MONTHS.map((m, index) => {
+        const found = data.find((d) => d.month === index + 1);
+        return {
+          month: m,
+          rate: found ? found.rate : 0,
+        };
+      });
+
+      return apiResponse.OK({
+        res,
+        message: "Shift fulfillment rate fetched successfully",
+        data: formattedData,
+      });
+    } catch (err) {
+      console.error(err);
+      return apiResponse.CATCH_ERROR({
+        res,
+        message: message.something_went_wrong,
+      });
+    }
+  },
+
   // Apply to job ------------------------------
   applyJob: async (req, res) => {
     try {

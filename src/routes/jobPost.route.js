@@ -88,6 +88,9 @@ router.get("/application/:id", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.EMPLOYE
 // get job post overview count
 router.get("/overview", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.EMPLOYEE] }), validate(jobPostValidation.getJobpostOverviewCount), postController.getJobpostOverviewCount);
 
+// shift fullfill graph
+router.get("/shift-fulfillment-rate", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.EMPLOYEE] }), postController.getShiftFulfillmentRate);
+
 // view job by id
 router.get("/:id", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.EMPLOYEE, ROLE.ADMIN] }), validate(jobPostValidation.getJobPostDetails), postController.getJobPostDetail);
 
