@@ -1,0 +1,2453 @@
+{
+	"info": {
+		"_postman_id": "453cb91f-3c17-4352-84b2-fdf3b3834b60",
+		"name": "Shiftly-client",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "26514170"
+	},
+	"item": [
+		{
+			"name": "Auth",
+			"item": [
+				{
+					"name": "Admin login",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\":\"adminshiftly@yopmail.com\",\n    \"password\":\"admin@123\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}api/user/login",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"user",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "send otp",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\":\"9111122222\"\n}\n\n// 8347337661, 9111122222  hospital owner number \n// 9078563412, 9333344444 employee number 9878987898",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}api/user/sendOtp",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"user",
+								"sendOtp"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "verify otp",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"phone\": \"9111122222\",\n    \"otp\": \"0000\",\n    \"fcmToken\": \"dekfnefcekm\"\n}\n// 8347337661, 9111122222  hospital owner number\n// 9078563412, 9333344444 employee number",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}api/user/verifyOtp",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"user",
+								"verifyOtp"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Signup Employee",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "rohan patel",
+									"type": "text"
+								},
+								{
+									"key": "role",
+									"value": "employee",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "rohan@example.com",
+									"type": "text"
+								},
+								{
+									"key": "countryCode",
+									"value": "+91",
+									"type": "text"
+								},
+								{
+									"key": "phone",
+									"value": "9878987898",
+									"type": "text"
+								},
+								{
+									"key": "profession",
+									"value": "Nursing",
+									"type": "text"
+								},
+								{
+									"key": "skill",
+									"value": "Maintenance",
+									"type": "text",
+									"disabled": true
+								},
+								{
+									"key": "experience",
+									"value": "5",
+									"type": "text"
+								},
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/home/dreamworld/Downloads/semi.png"
+								},
+								{
+									"key": "bankDetail[accountHolderName]",
+									"value": "Rohan patel",
+									"type": "text"
+								},
+								{
+									"key": "bankDetail[accountNumber]",
+									"value": "123456789012",
+									"type": "text"
+								},
+								{
+									"key": "bankDetail[ifscCode]",
+									"value": "HDFC0001234",
+									"type": "text"
+								},
+								{
+									"key": "bankDetail[branchName]",
+									"value": "minibazar",
+									"type": "text"
+								},
+								{
+									"key": "bankDetail[bankName]",
+									"value": "sbi",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}api/user/signup",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"user",
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Signup Hospital",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "name",
+									"value": "anupam Hospital",
+									"type": "text"
+								},
+								{
+									"key": "role",
+									"value": "hospital",
+									"type": "text"
+								},
+								{
+									"key": "email",
+									"value": "anupam@yopmail.com",
+									"type": "text"
+								},
+								{
+									"key": "countryCode",
+									"value": "+91",
+									"type": "text"
+								},
+								{
+									"key": "phone",
+									"value": "9212121213",
+									"type": "text"
+								},
+								{
+									"key": "facility",
+									"value": "Multispeciality 250+ beds",
+									"type": "text"
+								},
+								{
+									"key": "city",
+									"value": "Surat",
+									"type": "text"
+								},
+								{
+									"key": "state",
+									"value": "Gujarat",
+									"type": "text"
+								},
+								{
+									"key": "address",
+									"value": "Ring Road, Surat",
+									"type": "text"
+								},
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/home/dreamworld/Downloads/semi.png"
+								},
+								{
+									"key": "bankDetail[accountHolderName]",
+									"value": "anupam pvt ltd",
+									"type": "text"
+								},
+								{
+									"key": "bankDetail[accountNumber]",
+									"value": "123456789012",
+									"type": "text"
+								},
+								{
+									"key": "bankDetail[ifscCode]",
+									"value": "HDFC0001234",
+									"type": "text"
+								},
+								{
+									"key": "bankDetail[branchName]",
+									"value": "minibazar",
+									"type": "text"
+								},
+								{
+									"key": "bankDetail[bankName]",
+									"value": "sbi",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}api/user/signup",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"user",
+								"signup"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change password",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"phone\": \"9876543210\",\n  \"newPassword\": \"NewPass@123\",\n  \"confirmPassword\": \"NewPass@123\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:5000/api/user/change-password",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "5000",
+							"path": [
+								"api",
+								"user",
+								"change-password"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "upload",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/home/dreamworld/Downloads/semi.png"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}api/user/upload",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"user",
+								"upload"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "View profile",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-auth-token",
+								"value": "{{employee}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": []
+						},
+						"url": {
+							"raw": "{{url}}api/user/profile",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"user",
+								"profile"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Edit profile",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "x-auth-token",
+								"value": "{{employee}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"name\": \"john doe\",\r\n    \"profession\": \"software engineer\",\r\n    \"profileImage\": \"https://example.com/profile/johndoe.jpg\",\r\n    \"skill\": [\r\n        \"node.js\",\r\n        \"react.js\",\r\n        \"mongodb\"\r\n    ],\r\n    \"resumeUrl\": \"https://example.com/resume/johndoe.pdf\",\r\n    \"experience\": 3,\r\n    \"bankDetail\": {\r\n        \"bankName\": \"state bank of india\",\r\n        \"branchName\": \"ring road branch\",\r\n        \"accountNumber\": \"123456789012\",\r\n        \"accountHolderName\": \"john doe\",\r\n        \"ifscCode\": \"SBIN0001234\"\r\n    },\r\n    \"facility\": \"city hospital\",\r\n    \"city\": \"surat\",\r\n    \"state\": \"gujarat\",\r\n    \"address\": \"adajan gam, near pal rto\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}api/user/edit-profile",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"user",
+								"edit-profile"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "JobPost",
+			"item": [
+				{
+					"name": "change job application status by hospital Copy",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-auth-token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTI1ZDMxMDlkYTEyOGQ3OGZlODkyY2EiLCJwaG9uZSI6IjkwNzg1NjM0MTIiLCJpYXQiOjE3NjQxNzY3NDAsImV4cCI6MTc5NDg0ODc0MH0.D0p6xUDB-1cYBy00URzJYF-3tXWorBIH_LSdpV-DjGA",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"status\": \"hired\"\n}"
+						},
+						"url": {
+							"raw": "{{url}}api/job-post/application/hospital/status/69273bd9ba5311373ca79839",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"job-post",
+								"application",
+								"hospital",
+								"status",
+								"69273bd9ba5311373ca79839"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Setting",
+			"item": [
+				{
+					"name": "Get Setting",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-auth-token",
+								"value": "{{hospital}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}api/user/setting",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"user",
+								"setting"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Applicant",
+			"item": [
+				{
+					"name": "Job post list all",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-auth-token",
+								"value": "{{employee}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}api/job-post/list",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"job-post",
+								"list"
+							],
+							"query": [
+								{
+									"key": "recruiterId",
+									"value": "6925d1db9da128d78fe892bf",
+									"disabled": true
+								},
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "pending",
+									"disabled": true
+								},
+								{
+									"key": "city",
+									"value": "surat",
+									"disabled": true
+								},
+								{
+									"key": "state",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "minExperience",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "maxExperience",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "minSalary",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "maxSalary",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "startDate",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "endDate",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "getAllJobPostWithApplicantAppliedFlag",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-auth-token",
+								"value": "{{employee}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}api/job-post/getAllJobPostWithApplicantAppliedFlag?page=1&limit=2",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"job-post",
+								"getAllJobPostWithApplicantAppliedFlag"
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "pending",
+									"disabled": true
+								},
+								{
+									"key": "city",
+									"value": "surat",
+									"disabled": true
+								},
+								{
+									"key": "state",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "minExperience",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "maxExperience",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "minSalary",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "maxSalary",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "startDate",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "endDate",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Job Post Overview count",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-auth-token",
+								"value": "{{hospital}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}api/job-post/overview?applicantId=692ab763799e759a40b6f9df",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"job-post",
+								"overview"
+							],
+							"query": [
+								{
+									"key": "applicantId",
+									"value": "692ab763799e759a40b6f9df"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "view Job post detail",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": ""
+							},
+							{
+								"key": "x-auth-token",
+								"value": "{{employee}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}api/job-post/693291b20f180d3c4a9b1e91",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"job-post",
+								"693291b20f180d3c4a9b1e91"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "apply to job",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-auth-token",
+								"value": "{{employee}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"jobPostId\": \"69330065ca9683223a7a03d8\"\n}"
+						},
+						"url": {
+							"raw": "{{url}}api/job-post/apply",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"job-post",
+								"apply"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List of my applied jobs (pending)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-auth-token",
+								"value": "{{employee}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}api/job-post/my-applied-job/list?limit=10&page=1",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"job-post",
+								"my-applied-job",
+								"list"
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "john",
+									"disabled": true
+								},
+								{
+									"key": "skill",
+									"value": "Node.js",
+									"disabled": true
+								},
+								{
+									"key": "isActive",
+									"value": "false",
+									"disabled": true
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "sortField",
+									"value": "createdAt",
+									"disabled": true
+								},
+								{
+									"key": "sortOrder",
+									"value": "desc",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Start job (I'am arrived)",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "x-auth-token",
+								"value": "{{employee}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "// Job Post ID in params",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "http://localhost:3002/api/job-post/start-job/6929be6511d8870736002697",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3002",
+							"path": [
+								"api",
+								"job-post",
+								"start-job",
+								"6929be6511d8870736002697"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Complete job status by aplicant",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "x-auth-token",
+								"value": "{{employee}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "// Job Post ID in params",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}api/job-post/complete-job/6929be6511d8870736002697",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"job-post",
+								"complete-job",
+								"6929be6511d8870736002697"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "View Upcoming jobs (Applicant & Hospital)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-auth-token",
+								"value": "{{employee}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}api/job-post/upcoming-job/list?applicantId=692d9db72b7e46efee3eefb3",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"job-post",
+								"upcoming-job",
+								"list"
+							],
+							"query": [
+								{
+									"key": "applicantId",
+									"value": "692d9db72b7e46efee3eefb3"
+								},
+								{
+									"key": "recruiterId",
+									"value": "6926bf93a3b230e6a11dd641",
+									"disabled": true
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "View Ongoing jobs (Applicant & Hospital)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-auth-token",
+								"value": "{{employee}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3002/api/job-post/ongoing-job/list?applicantId=6925d3109da128d78fe892ca&page=1&limit=10",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3002",
+							"path": [
+								"api",
+								"job-post",
+								"ongoing-job",
+								"list"
+							],
+							"query": [
+								{
+									"key": "applicantId",
+									"value": "6925d3109da128d78fe892ca"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "View Completed jobs (Applicant & Hospital)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-auth-token",
+								"value": "{{hospital}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}api/job-post/completed-job/list?applicantId=6925d3109da128d78fe892ca&page=1&limit=10",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"job-post",
+								"completed-job",
+								"list"
+							],
+							"query": [
+								{
+									"key": "applicantId",
+									"value": "6925d3109da128d78fe892ca"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "View Verified jobs (Applicant & Hospital)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-auth-token",
+								"value": "{{hospital}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}api/job-post/verified-job/list?applicantId=6925d3109da128d78fe892ca&page=1&limit=10",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"job-post",
+								"verified-job",
+								"list"
+							],
+							"query": [
+								{
+									"key": "applicantId",
+									"value": "6925d3109da128d78fe892ca"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Job post all status overview count (completed, ongoing etc..)",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-auth-token",
+								"value": "{{employee}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}api/job-post/status-overview?applicantId=692d9db72b7e46efee3eefb3",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"job-post",
+								"status-overview"
+							],
+							"query": [
+								{
+									"key": "applicantId",
+									"value": "692d9db72b7e46efee3eefb3"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Hospital api",
+			"item": [
+				{
+					"name": "Create post",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-auth-token",
+								"value": "{{hospital}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"title\": \"Hospital Receptionist\",\n    \"description\": \"We are looking for a polite and responsible receptionist to manage patient inquiries and front desk operations.\",\n    \"skills\": [\n        \"Communication\",\n        \"Basic Computer Knowledge\",\n        \"Customer Handling\"\n    ],\n    \"experience\": {\n        \"min\": 0,\n        \"max\": 3\n    },\n    \"location\": {\n        \"city\": \"Bangalore\",\n        \"state\": \"Karnataka\",\n        \"country\": \"India\",\n        \"address\": \"MG Road, Bangalore\",\n        \"latitude\": 78.1232,\n        \"longitude\": 21.867\n    },\n    \"salary\": \"12000\",\n    \"shiftStartTime\": \"08:00\",\n    \"shiftEndTime\": \"17:00\",\n    \"jobStartDate\": \"2025-06-10\",\n    \"jobEndDate\": \"2025-06-20\",\n    \"transactionId\": \"txn_837sjdhf92\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}api/job-post/add",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"job-post",
+								"add"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "JobPayment by hospital",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-auth-token",
+								"value": "{{hospital}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"jobPostId\": \"692ab8ac799e759a40b6f9e7\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}api/job-post/payment",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"job-post",
+								"payment"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Job post list all (hospital)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-auth-token",
+								"value": "{{hospital}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}api/job-post/list?recruiterId=692d9f992b7e46efee3eefbd",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"job-post",
+								"list"
+							],
+							"query": [
+								{
+									"key": "recruiterId",
+									"value": "692d9f992b7e46efee3eefbd"
+								},
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "pending",
+									"disabled": true
+								},
+								{
+									"key": "city",
+									"value": "surat",
+									"disabled": true
+								},
+								{
+									"key": "state",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "minExperience",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "maxExperience",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "minSalary",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "maxSalary",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "startDate",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "endDate",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List of applicant applied jobs only",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-auth-token",
+								"value": "{{hospital}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}api/job-post/list-applied-job",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"job-post",
+								"list-applied-job"
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "city",
+									"value": "surat",
+									"disabled": true
+								},
+								{
+									"key": "state",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Job Post Overview count",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-auth-token",
+								"value": "{{hospital}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}api/job-post/overview?recruiterId=692ac105d4e9033ee1f1a827",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"job-post",
+								"overview"
+							],
+							"query": [
+								{
+									"key": "recruiterId",
+									"value": "692ac105d4e9033ee1f1a827"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Job post all status overview count (completed, ongoing etc..)",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-auth-token",
+								"value": "{{employee}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}api/job-post/status-overview?recruiterId=692d9f992b7e46efee3eefbd",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"job-post",
+								"status-overview"
+							],
+							"query": [
+								{
+									"key": "recruiterId",
+									"value": "692d9f992b7e46efee3eefbd"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "view Job post detail",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": ""
+							},
+							{
+								"key": "x-auth-token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTI2YmY5M2EzYjIzMGU2YTExZGQ2NDEiLCJwaG9uZSI6IjgzNDczMzc2NjIiLCJpYXQiOjE3NjQxNDcwOTEsImV4cCI6MTc2NDIzMzQ5MX0.VySTHY2XLJpNedIZ1v9GtbyZPKOBTedtpkKYcPpXPIk",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}api/job-post/6926cc9c39865ea4b177ff52",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"job-post",
+								"6926cc9c39865ea4b177ff52"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "List of job applicantion",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-auth-token",
+								"value": "{{hospital}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}api/job-post/application/list?jobPostId=692da4862b7e46efee3eefcd",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"job-post",
+								"application",
+								"list"
+							],
+							"query": [
+								{
+									"key": "applicantId",
+									"value": "6927372ad9723ebf304f1f17",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "hired",
+									"disabled": true
+								},
+								{
+									"key": "search",
+									"value": "john",
+									"disabled": true
+								},
+								{
+									"key": "skill",
+									"value": "Node.js",
+									"disabled": true
+								},
+								{
+									"key": "phone",
+									"value": "9876543210",
+									"disabled": true
+								},
+								{
+									"key": "profession",
+									"value": "Developer",
+									"disabled": true
+								},
+								{
+									"key": "minExperience",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "maxExperience",
+									"value": "5",
+									"disabled": true
+								},
+								{
+									"key": "isActive",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "startDate",
+									"value": "2024-01-01",
+									"disabled": true
+								},
+								{
+									"key": "endDate",
+									"value": "2024-12-31",
+									"disabled": true
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"disabled": true
+								},
+								{
+									"key": "sortField",
+									"value": "createdAt",
+									"disabled": true
+								},
+								{
+									"key": "sortOrder",
+									"value": "desc",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "jobPostId",
+									"value": "692da4862b7e46efee3eefcd"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "View Job application detail",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-auth-token",
+								"value": "{{hospital}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}api/job-post/application/6929be8611d887073600269d",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"job-post",
+								"application",
+								"6929be8611d887073600269d"
+							],
+							"query": [
+								{
+									"key": "applicantId",
+									"value": "6927372ad9723ebf304f1f17",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "hired",
+									"disabled": true
+								},
+								{
+									"key": "search",
+									"value": "john",
+									"disabled": true
+								},
+								{
+									"key": "skill",
+									"value": "Node.js",
+									"disabled": true
+								},
+								{
+									"key": "phone",
+									"value": "9876543210",
+									"disabled": true
+								},
+								{
+									"key": "profession",
+									"value": "Developer",
+									"disabled": true
+								},
+								{
+									"key": "minExperience",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "maxExperience",
+									"value": "5",
+									"disabled": true
+								},
+								{
+									"key": "isActive",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "startDate",
+									"value": "2024-01-01",
+									"disabled": true
+								},
+								{
+									"key": "endDate",
+									"value": "2024-12-31",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Hire Applicant",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-auth-token",
+								"value": "{{hospital}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "// application id in params"
+						},
+						"url": {
+							"raw": "{{url}}api/job-post/application/hospital/hire/6931b2de40872652f3ded65e",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"job-post",
+								"application",
+								"hospital",
+								"hire",
+								"6931b2de40872652f3ded65e"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change Verified job status by hospital user",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "x-auth-token",
+								"value": "{{hospital}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "// Job Post ID in params",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}api/job-post/verified-job/692da4862b7e46efee3eefcd",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"job-post",
+								"verified-job",
+								"692da4862b7e46efee3eefcd"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "View Upcoming jobs (Applicant & Hospital)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-auth-token",
+								"value": "{{hospital}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3002/api/job-post/upcoming-job/list?recruiterId=692ab74c799e759a40b6f9d5",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3002",
+							"path": [
+								"api",
+								"job-post",
+								"upcoming-job",
+								"list"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "recruiterId",
+									"value": "692ab74c799e759a40b6f9d5"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "View Ongoing jobs (Applicant & Hospital)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-auth-token",
+								"value": "{{hospital}}"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:3002/api/job-post/ongoing-job/list?recruiterId=692ab74c799e759a40b6f9d5&page=1&limit=10",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "3002",
+							"path": [
+								"api",
+								"job-post",
+								"ongoing-job",
+								"list"
+							],
+							"query": [
+								{
+									"key": "recruiterId",
+									"value": "692ab74c799e759a40b6f9d5"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "View Completed jobs (Applicant & Hospital)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-auth-token",
+								"value": "{{hospital}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}api/job-post/completed-job/list?recruiterId=6925d1db9da128d78fe892bf&page=1&limit=10",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"job-post",
+								"completed-job",
+								"list"
+							],
+							"query": [
+								{
+									"key": "recruiterId",
+									"value": "6925d1db9da128d78fe892bf"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "View Verified jobs (Applicant & Hospital)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-auth-token",
+								"value": "{{hospital}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}api/job-post/verified-job/list?recruiterId=6925d1db9da128d78fe892bf&page=1&limit=10",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"job-post",
+								"verified-job",
+								"list"
+							],
+							"query": [
+								{
+									"key": "recruiterId",
+									"value": "6925d1db9da128d78fe892bf"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "View Expried jobs (Applicant & Hospital)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-auth-token",
+								"value": "{{hospital}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}api/job-post/expried-job/list?recruiterId=692d9f992b7e46efee3eefbd&page=1&limit=10",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"job-post",
+								"expried-job",
+								"list"
+							],
+							"query": [
+								{
+									"key": "recruiterId",
+									"value": "692d9f992b7e46efee3eefbd"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Request for refund",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "x-auth-token",
+								"value": "{{hospital}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}api/job-post/refund-request/6933cfeb76b8f93e6c611b31",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"job-post",
+								"refund-request",
+								"6933cfeb76b8f93e6c611b31"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "View refund request jobs (Admin & Hospital)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-auth-token",
+								"value": "{{hospital}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}api/job-post/refund-req/list?recruiterId=692d9f992b7e46efee3eefbd&page=1&limit=10",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"job-post",
+								"refund-req",
+								"list"
+							],
+							"query": [
+								{
+									"key": "recruiterId",
+									"value": "692d9f992b7e46efee3eefbd"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "View refund completed request (Admin & Hospital)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-auth-token",
+								"value": "{{hospital}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}api/job-post/refund-completed/list?page=1&limit=10",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"job-post",
+								"refund-completed",
+								"list"
+							],
+							"query": [
+								{
+									"key": "recruiterId",
+									"value": "692d9f992b7e46efee3eefbd",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Notification",
+			"item": [
+				{
+					"name": "Notification list",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-auth-token",
+								"value": "{{hospital}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}api/notification/list",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"notification",
+								"list"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Admin",
+			"item": [
+				{
+					"name": "Job post list all (hospital)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "x-auth-token",
+								"value": "{{admin}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}api/job-post/list?status=hired",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"job-post",
+								"list"
+							],
+							"query": [
+								{
+									"key": "recruiterId",
+									"value": "692d9f992b7e46efee3eefbd",
+									"disabled": true
+								},
+								{
+									"key": "search",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "status",
+									"value": "hired"
+								},
+								{
+									"key": "city",
+									"value": "surat",
+									"disabled": true
+								},
+								{
+									"key": "state",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "minExperience",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "maxExperience",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "minSalary",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "maxSalary",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "startDate",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "endDate",
+									"value": "",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1",
+									"disabled": true
+								},
+								{
+									"key": "limit",
+									"value": "10",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "view Job post detail",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": ""
+							},
+							{
+								"key": "x-auth-token",
+								"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2OTI2YmY5M2EzYjIzMGU2YTExZGQ2NDEiLCJwaG9uZSI6IjgzNDczMzc2NjIiLCJpYXQiOjE3NjQxNDcwOTEsImV4cCI6MTc2NDIzMzQ5MX0.VySTHY2XLJpNedIZ1v9GtbyZPKOBTedtpkKYcPpXPIk",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}api/job-post/6926cc9c39865ea4b177ff52",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"job-post",
+								"6926cc9c39865ea4b177ff52"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "View refund request jobs (Admin & Hospital)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-auth-token",
+								"value": "{{hospital}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}api/job-post/refund-req/list?page=1&limit=10",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"job-post",
+								"refund-req",
+								"list"
+							],
+							"query": [
+								{
+									"key": "recruiterId",
+									"value": "692d9f992b7e46efee3eefbd",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "View refund request and refund completed jobs (Admin & Hospital)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-auth-token",
+								"value": "{{hospital}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}api/job-post/refund-req/list?page=1&limit=10",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"job-post",
+								"refund-req",
+								"list"
+							],
+							"query": [
+								{
+									"key": "recruiterId",
+									"value": "692d9f992b7e46efee3eefbd",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Send refund to Hospital (by admin)",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/C:/Users/DELL/Downloads/images (1).jpg"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{url}}api/job-post/send-refund/693054a170c6543584c64643",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"job-post",
+								"send-refund",
+								"693054a170c6543584c64643"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "View refund completed request (Admin & Hospital)",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-auth-token",
+								"value": "{{hospital}}"
+							}
+						],
+						"url": {
+							"raw": "{{url}}api/job-post/refund-completed/list?recruiterId=692d9f992b7e46efee3eefbd&page=1&limit=10",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"job-post",
+								"refund-completed",
+								"list"
+							],
+							"query": [
+								{
+									"key": "recruiterId",
+									"value": "692d9f992b7e46efee3eefbd"
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Get all user by role",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-auth-token",
+								"value": "{{admin}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{url}}api/user/user-list?isActive=true&page=1&limit=10&role=employee",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"user",
+								"user-list"
+							],
+							"query": [
+								{
+									"key": "search",
+									"value": "john",
+									"disabled": true
+								},
+								{
+									"key": "isActive",
+									"value": "true"
+								},
+								{
+									"key": "city",
+									"value": "surat",
+									"disabled": true
+								},
+								{
+									"key": "state",
+									"value": "gujarat",
+									"disabled": true
+								},
+								{
+									"key": "page",
+									"value": "1"
+								},
+								{
+									"key": "limit",
+									"value": "10"
+								},
+								{
+									"key": "role",
+									"value": "employee"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Set commission percentage",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{
+								"key": "x-auth-token",
+								"value": "{{hospital}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"commission\": 5\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}api/user/set-commission-percentage",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"user",
+								"set-commission-percentage"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Dashboard overview count",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "x-auth-token",
+								"value": "{{hospital}}"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{url}}api/user/dashboard-overview",
+							"host": [
+								"{{url}}api"
+							],
+							"path": [
+								"user",
+								"dashboard-overview"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Test",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}",
+					"host": [
+						"{{url}}"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
