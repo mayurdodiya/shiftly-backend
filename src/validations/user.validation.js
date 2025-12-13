@@ -87,7 +87,7 @@ const updateFcm = {
 
 const setCommissionPercentage = {
   body: Joi.object().keys({
-    commission: Joi.number().required(),
+    commission: Joi.number().min(1).required(),
   }),
 };
 
