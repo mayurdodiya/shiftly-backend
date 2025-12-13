@@ -1406,6 +1406,68 @@ module.exports = {
       return apiResponse.CATCH_ERROR({ res, message: message.something_went_wrong });
     }
   },
+  // view all refund request and payment completed job posts
+  viewAllRefundReqAndCompletedReq: async (req, res) => {
+    try {
+      const { recruiterId, status, search, city, state, startDate, endDate, page, limit } = req.query;
+
+      const { skip, limit: pageLimit } = getPagination(page, limit);
+
+      let filterArr = [{ deletedAt: null, isActive: true, status: { $in: [APPLICATION_STATUS.REFUND_REQUEST, APPLICATION_STATUS.REFUND_COMPLETED] } }];
+
+      // Search (title, description, skills)
+      if (search) {
+        const reg = new RegExp(search, "i");
+        filterArr.push({
+          $or: [{ title: reg }, { "location.city": reg }, { "location.state": reg }],
+        });
+      }
+
+      if (status) filterArr.push({ status: status });
+      if (recruiterId) filterArr.push({ recruiterId: recruiterId });
+
+      // Location Filters
+      if (city) filterArr.push({ "location.city": city });
+      if (state) filterArr.push({ "location.state": state });
+
+      // Date Range Filter
+      if (startDate) {
+        filterArr.push({
+          jobStartDate: { $gte: new Date(startDate) },
+        });
+      }
+      if (endDate) {
+        filterArr.push({
+          jobStartDate: { $lte: new Date(endDate) },
+        });
+      }
+
+      const filterQuery = filterArr.length > 0 ? { $and: filterArr } : {};
+      const popupate = [
+        {
+          path: "recruiterId",
+          select: "name email phone role",
+        },
+        {
+          path: "hiredApplicantId",
+        },
+      ]
+      const data = await JobPostModel.find(filterQuery).populate(popupate).skip(skip).limit(pageLimit).sort({ updatedAt: -1 });
+      const totalCount = await JobPostModel.countDocuments(filterQuery);
+
+      const response = pagingData({
+        data,
+        total: totalCount,
+        page,
+        limit: pageLimit,
+      });
+
+      return apiResponse.OK({ res, message: `Job Post ${message.data_get} `, data: response });
+    } catch (err) {
+      console.log("Error fetching job posts", err);
+      return apiResponse.CATCH_ERROR({ res, message: message.something_went_wrong });
+    }
+  },
 
   // view all refund completed jobs for hospital and admin
   viewAllRefundCompletedRequest: async (req, res) => {

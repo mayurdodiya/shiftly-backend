@@ -369,6 +369,46 @@ const viewAllExpriedJobs = {
   }),
 };
 
+const viewAllRefundReqAndCompletedReq = {
+  body: Joi.object().keys({
+    recruiterId: objectId("recruiterId").optional(),
+    search: Joi.string().trim().lowercase().allow("", null),
+
+    salary: Joi.object({
+      min: Joi.number().min(0),
+      max: Joi.number().min(0),
+    }),
+
+    startDate: Joi.string()
+      .trim()
+      .pattern(dateFormate)
+      .allow(null, "")
+      .messages({
+        "string.pattern.base": "startDate must be in YYYY-MM-DD format only",
+      }),
+
+    endDate: Joi.string()
+      .trim()
+      .pattern(dateFormate)
+      .allow(null, "")
+      .messages({
+        "string.pattern.base": "endDate must be in YYYY-MM-DD format only",
+      }),
+
+    page: Joi.number().min(1).default(1),
+    limit: Joi.number().min(1).max(100).default(10),
+
+    status: Joi.string()
+      .valid(APPLICATION_STATUS.REFUND_REQUEST, APPLICATION_STATUS.REFUND_COMPLETED)
+      .optional()
+      .label("Application Status")
+      .messages({
+        "any.only": "{#label} must be one of the allowed statuses",
+        "any.required": "{#label} is required",
+      }),
+  }),
+};
+
 const getJobPostDetails = {
   params: Joi.object().keys({
     id: objectId("id").required().messages({
@@ -561,4 +601,5 @@ module.exports = {
   jobpostStatusOverviewCount,
   requestForRefund,
   sendRefundToHospital,
+  viewAllRefundReqAndCompletedReq,
 };

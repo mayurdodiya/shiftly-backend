@@ -46,7 +46,7 @@ router.get("/profile", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.EMPLOYEE, ROLE.
 router.get("/user-list", auth({ usersAllowed: [ROLE.ADMIN] }), validate(userValidation.getAllUser), userController.getAllUser);
 
 // get dashboard overview count
-router.get("/dashboard-overview", /* auth({ usersAllowed: [ROLE.ADMIN] }), */ userController.adminDashboardOverviewCount);
+router.get("/dashboard-overview", auth({ usersAllowed: [ROLE.ADMIN, ROLE.HOSPITAL, ROLE.EMPLOYEE] }), userController.adminDashboardOverviewCount);
 
 // get user details
 // router.get("/:id", /* validate(userValidation.changePassword), */ userController.getUser);

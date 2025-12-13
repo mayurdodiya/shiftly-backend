@@ -59,10 +59,10 @@ const userSchema = mongoose.Schema(
       accountHolderName: { type: String, trim: true },
       ifscCode: { type: String, trim: true },
     },
-    // password: {
-    //   type: String,
-    //   trim: true,
-    // },
+    password: {
+      type: String,
+      trim: true,
+    },
     facility: {
       type: String,
       trim: true,

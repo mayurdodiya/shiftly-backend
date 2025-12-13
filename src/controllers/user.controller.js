@@ -253,8 +253,8 @@ module.exports = {
 
   getProfile: async (req, res) => {
     try {
-      const { user } = req
-      return apiResponse.OK({ res, message: `Profile ${message.data_get}`, data: user });
+      const { password, ...safeUser } = req.user;
+      return apiResponse.OK({ res, message: `Profile ${message.data_get}`, data: safeUser });
     } catch (err) {
       console.log(err);
       return apiResponse.CATCH_ERROR({ res, message: message.something_went_wrong });
@@ -337,7 +337,7 @@ module.exports = {
 
   adminDashboardOverviewCount: async (req, res) => {
     try {
-      const [hospitalCount, employeeCount, refundReqCount, refundCompletedCount, completedReqCount, ongoingJobCount, verifiedJobCount, totalRevenue] = await Promise.all([
+      const [hospitalCount, employeeCount, refundReqCount, refundCompletedCount, completedReqCount, ongoingJobCount, verifiedJobCount, totalRevenue, settings] = await Promise.all([
         // total hospital count
         UserModel.countDocuments({ role: ROLE.HOSPITAL }),
         // total employee count
@@ -366,9 +366,11 @@ module.exports = {
             }
           }
         ]),
+        // admin commission percentage
+        SettingModel.findOne()
       ])
       const obj = {
-        hospitalCount, employeeCount, refundReqCount, refundCompletedCount, completedReqCount, ongoingJobCount, verifiedJobCount, totalRevenue: totalRevenue[0].totalAdminFee
+        hospitalCount, employeeCount, refundReqCount, refundCompletedCount, completedReqCount, ongoingJobCount, verifiedJobCount, totalRevenue: totalRevenue[0].totalAdminFee, settings
       }
 
       return apiResponse.OK({ res, message: `Dashboard overview data ${message.data_get}`, data: obj, });

@@ -70,6 +70,9 @@ router.get("/expried-job/list", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.ADMIN]
 // view all refund request for hospital and admin
 router.get("/refund-req/list", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.ADMIN] }), validate(jobPostValidation.viewAllExpriedJobs), postController.viewAllRefundRequest);
 
+// view all refund request for hospital and admin
+router.get("/refund-req-refund-completed/list", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.ADMIN] }), validate(jobPostValidation.viewAllRefundReqAndCompletedReq), postController.viewAllRefundReqAndCompletedReq);
+
 // view all refund completed jobs for hospital and admin
 router.get("/refund-completed/list", auth({ usersAllowed: [ROLE.HOSPITAL] }), validate(jobPostValidation.viewAllExpriedJobs), postController.viewAllRefundCompletedRequest);
 
