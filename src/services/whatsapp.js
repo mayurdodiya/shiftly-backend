@@ -7,7 +7,7 @@ const to = "918347337661"; // without '+' for WhatsApp Cloud API (test number)
 
 
 const appSecrate="ec69ca6d621991f061e738cdb951bdc9"
-const appId = "1454621828917055"
+const appId = "1454621828917055"  
 
 async function sendWhatsAppMessage() {
   try {
