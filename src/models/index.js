@@ -3,6 +3,6 @@ module.exports.OtpModel = require("./otp.model");
 module.exports.JobPostModel = require("./jobPost.model");
 module.exports.SettingModel = require("./setting.model");
 module.exports.JobApplicationModel = require("./jobApplication.model");
-module.exports.PaymentModel = require("./payment.model");
+// module.exports.PaymentModel = require("./payment.model");
 module.exports.NotificationModel = require("./notification.model");
 
