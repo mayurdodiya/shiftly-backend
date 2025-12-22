@@ -4,13 +4,6 @@ const ROLE = {
   HOSPITAL: "hospital",
 };
 
-// const POST_STATUS = {
-//   OPEN: "open",
-//   CLOSED: "closed",
-//   PAUSED: "paused",
-//   EXPIRED: "expired",
-// };
-
 const JOB_POST_PAYMENT_STATUS = {
   // Recruiter → Admin (job creation)
   RECRUITER_PAYMENT_PENDING: "recruiter_payment_pending",
@@ -41,9 +34,25 @@ const APPLICATION_STATUS = {
   REFUND_COMPLETED: "refund_completed",
 };
 
+const RAZORPAY_PAYMENT_STATUS = {
+  PENDING: "pending",
+  CREATED: "created",
+  AUTHORIZED: "authorized",
+  CAPTURED: "captured",
+  FAILED: "failed",
+  REFUNDED: "refunded",
+};
+
+const PAYMENT_MODE = {
+  JOB_POST_PAYMENT: "job_post_payment",
+  JOB_POST_REFUND: "job_post_refund",
+  APPLICANT_PAYMENT: "applicant_payment",
+}
+
 module.exports = {
   ROLE,
-  // POST_STATUS,
   APPLICATION_STATUS,
   JOB_POST_PAYMENT_STATUS,
+  RAZORPAY_PAYMENT_STATUS,
+  PAYMENT_MODE
 };

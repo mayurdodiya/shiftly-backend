@@ -1,4 +1,5 @@
 const Razorpay = require("razorpay");
+const { ROLE, PAYMENT_MODE } = require("../utils/constant");
 
 const razorpay = new Razorpay({
     key_id: process.env.RAZORPAY_KEY_ID,
@@ -46,30 +47,15 @@ async function payoutToEmployee(fundAccountId, amount) {
 
 // create job post payment link (workable)
 async function generatePaymentLinkForCreatePost(data) {
-    data = {
-        job: {
-            _id: 12345678910,
-            title: "test job for payment",
-            amount: 10,
-        },
-        user: {
-            name: "test user",
-            email: "mayurdodiya1234@gmail.com",
-            phone: "8347337661",
-            id: "1098765432",
-        }
-    }
-    console.log(data, '---------------------------data 1')
-    // return
 
     const paymentLink = await razorpay.paymentLink.create({
-        amount: data.job.amount * 100,
+        amount: data.amount * 100,
         currency: "INR",
-        description: `Payment for Job Post: ${data.job.title}`,
+        description: `Payment for Job Post create`,
         customer: {
-            name: data.user.name,
-            email: data.user.email,
-            contact: data.user.phone,
+            name: data.name,
+            email: data.email,
+            contact: data.phone,
         },
         notify: {
             sms: true,
@@ -77,11 +63,12 @@ async function generatePaymentLinkForCreatePost(data) {
         },
         callback_url: `${process.env.APPLICATION_REDIRECT_URL}`,
         callback_method: "get",
-
+        
         notes: {
-            jobPostId: data.job._id.toString(),
-            hospitalId: data.user.id,
-            purpose: "JOB_POST_PAYMENT",
+            paymentId: data.paymentId.toString(),
+            recruiterId: data.recruiterId.toString(),
+            purpose: PAYMENT_MODE.JOB_POST_PAYMENT,
+            role: ROLE.HOSPITAL
         },
     });
 
@@ -127,6 +114,10 @@ async function generatePaymentLinkForCreatePost(data) {
     return {
         paymentId: paymentLink.id,
         paymentUrl: paymentLink.short_url,
+        callback_url: paymentLink.callback_url,
+        notes: paymentLink.notes,
+        customer: paymentLink.customer,
+        currency: paymentLink.currency,
     }
 }
 

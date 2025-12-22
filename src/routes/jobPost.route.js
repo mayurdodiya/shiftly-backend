@@ -16,7 +16,7 @@ router.post("/add", auth({ usersAllowed: [ROLE.HOSPITAL] }), validate(jobPostVal
 router.post("/apply", auth({ usersAllowed: [ROLE.EMPLOYEE] }), validate(jobPostValidation.applyJob), postController.applyJob);
 
 // payment by hospital for new job posting
-router.post("/payment", auth({ usersAllowed: [ROLE.HOSPITAL] }), /* validate(jobPostValidation.applyJob), */ postController.addJobPostPayment);
+router.post("/generate-jobpost-paymentlink", auth({ usersAllowed: [ROLE.HOSPITAL] }), /* validate(jobPostValidation.applyJob), */ postController.generateJobPostPaymentLink);
 
 // request refund for admin (Hospital only)
 router.post("/refund-request/:jobPostId", auth({ usersAllowed: [ROLE.HOSPITAL] }), validate(jobPostValidation.requestForRefund), postController.requestForRefund);

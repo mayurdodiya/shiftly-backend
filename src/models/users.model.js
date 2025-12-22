@@ -40,6 +40,14 @@ const userSchema = mongoose.Schema(
       type: String,
       trim: true,
     },
+    education: {
+      type: String,
+      trim: true,
+    },
+    educationDoc: {
+      type: [String],
+      trim: true,
+    },
     skill: {
       type: [String],
       default: undefined,
@@ -82,7 +90,7 @@ const userSchema = mongoose.Schema(
     fcmToken: {
       type: String,
       default: ""
-      },
+    },
     isActive: {
       type: Boolean,
       default: true,

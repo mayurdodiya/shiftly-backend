@@ -41,8 +41,8 @@ module.exports = {
 
       // If file uploaded, store URL from S3
       if (req.file && req.file.location) {
-        // reqBody.resumeUrl = req.file.location;
-        reqBody.resumeUrl = "https://steinback.s3.amazonaws.com//upload-214.pdf";
+        reqBody.resumeUrl = req.file.location;
+        // reqBody.resumeUrl = "https://steinback.s3.amazonaws.com//upload-214.pdf";
       }
 
       let data = await UserModel.create({ ...reqBody });
