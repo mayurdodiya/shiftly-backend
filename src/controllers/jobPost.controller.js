@@ -5,7 +5,7 @@ const mongoose = require("mongoose");
 const { Types } = mongoose;
 const moment = require("moment");
 const { getPagination, pagingData } = require("../utils/utils");
-const { APPLICATION_STATUS, ROLE, PAYMENT_MODE, RAZORPAY_PAYMENT_STATUS } = require("../utils/constant");
+const { APPLICATION_STATUS, ROLE, PAYMENT_MODE, RAZORPAY_PAYMENT_STATUS, JOB_POST_PAYMENT_STATUS } = require("../utils/constant");
 const { sendNotification } = require('./../services/send-noification')
 const { generatePaymentLinkForCreatePost } = require("../services/razorpay");
 const crypto = require("crypto");
@@ -20,9 +20,11 @@ module.exports = {
       const { user } = req;
       reqBody.recruiterId = user._id;
 
-      // create payment using transactionId
-      // const payment = await PaymentModel.create({ transactionId:reqBody.transactionId });
-      // reqBody.recruiterPaymentId = payment._id
+      let payment = await PaymentModel.findOne({ _id: reqBody.paymentId });
+      if (!payment) return apiResponse.NOT_FOUND({ res, message: message.payment_not_found });
+      if (payment.paymentStatus !== RAZORPAY_PAYMENT_STATUS.CAPTURED) return apiResponse.BAD_REQUEST({ res, message: message.payment_pending });
+      reqBody.recruiterPaymentId = payment._id;
+      reqBody.paymentStatus = JOB_POST_PAYMENT_STATUS.RECRUITER_PAYMENT_SUCCESS;
 
       // Check recruiter exists
       const recruiter = await UserModel.findOne({ _id: reqBody.recruiterId, deletedAt: null, isActive: true });
@@ -46,6 +48,9 @@ module.exports = {
       reqBody.employeeSalary = reqBody.salary - (adminCommission.commission * reqBody.salary) / 100;
 
       const data = await JobPostModel.create({ ...reqBody });
+
+      // add job post id in payment table
+      await PaymentModel.findByIdAndUpdate(payment._id, { jobPostId: data._id })
 
       return apiResponse.OK({ res, message: message.job_post_created, data });
     } catch (err) {
@@ -1811,6 +1816,21 @@ module.exports = {
       return apiResponse.OK({ res, message: message.payment_link, data: response });
     } catch (err) {
       console.log("Error generateJobPostPaymentLink to job:", err);
+      return apiResponse.CATCH_ERROR({ res, message: message.something_went_wrong });
+    }
+  },
+
+  // check payment completion by hospital role only
+  checkPaymentCompletion: async (req, res) => {
+    try {
+      const { id: paymentId } = req.params;
+
+      let payment = await PaymentModel.findOne({ _id: paymentId });
+      if (!payment) return apiResponse.NOT_FOUND({ res, message: message.payment_not_found });
+
+      return apiResponse.OK({ res, message: message.payment_link, data: payment });
+    } catch (err) {
+      console.log("Error checkPaymentCompletion to job:", err);
       return apiResponse.CATCH_ERROR({ res, message: message.something_went_wrong });
     }
   },

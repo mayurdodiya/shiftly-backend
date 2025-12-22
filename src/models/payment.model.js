@@ -7,11 +7,6 @@ const { RAZORPAY_PAYMENT_STATUS, PAYMENT_MODE } = require("../utils/constant");
 
 const paymentSchema = mongoose.Schema(
     {
-        // paymentSlugId: {
-        //     type: String,
-        //     trim: true,
-        //     required: true,
-        // },
         senderId: {
             type: mongoose.Schema.Types.ObjectId,
             ref: "users",

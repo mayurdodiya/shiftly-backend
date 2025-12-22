@@ -16,7 +16,7 @@ router.post("/add", auth({ usersAllowed: [ROLE.HOSPITAL] }), validate(jobPostVal
 router.post("/apply", auth({ usersAllowed: [ROLE.EMPLOYEE] }), validate(jobPostValidation.applyJob), postController.applyJob);
 
 // payment by hospital for new job posting
-router.post("/generate-jobpost-paymentlink", auth({ usersAllowed: [ROLE.HOSPITAL] }), /* validate(jobPostValidation.applyJob), */ postController.generateJobPostPaymentLink);
+router.post("/generate-jobpost-paymentlink", auth({ usersAllowed: [ROLE.HOSPITAL] }), validate(jobPostValidation.generateJobPostPaymentLink), postController.generateJobPostPaymentLink);
 
 // request refund for admin (Hospital only)
 router.post("/refund-request/:jobPostId", auth({ usersAllowed: [ROLE.HOSPITAL] }), validate(jobPostValidation.requestForRefund), postController.requestForRefund);
@@ -42,6 +42,9 @@ router.put("/verified-job/:jobPostId", auth({ usersAllowed: [ROLE.HOSPITAL] }), 
 // ------------------------------- GET routes ------------------------------------------
 // list of applicant applied jobs only for hospital
 router.get("/list-applied-job", auth({ usersAllowed: [ROLE.HOSPITAL] }), validate(jobPostValidation.getOnlyAppliedJobPosts), postController.getOnlyAppliedJobPosts);
+
+// check payment completion by hospital role only
+router.get("/check-payment-completion/:id", auth({ usersAllowed: [ROLE.HOSPITAL] }), validate(jobPostValidation.checkPaymentCompletion), postController.checkPaymentCompletion);
 
 // list of all jobs
 router.get("/list", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.EMPLOYEE, ROLE.ADMIN] }), validate(jobPostValidation.getAllJobPost), postController.getAllJobPost);

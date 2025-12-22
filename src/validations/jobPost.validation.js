@@ -54,6 +54,7 @@ const addJobPost = {
     }),
 
     salary: Joi.number().required(),
+    paymentId: objectId("paymentId").required(),
 
     shiftStartTime: Joi.string()
       .trim()
@@ -375,8 +376,8 @@ const viewAllRefundReqAndCompletedReq = {
     search: Joi.string().trim().lowercase().allow("", null),
 
     salary: Joi.object({
-      min: Joi.number().min(0),
-      max: Joi.number().min(0),
+      min: Joi.number().min(1),
+      max: Joi.number().min(1),
     }),
 
     startDate: Joi.string()
@@ -419,6 +420,12 @@ const getJobPostDetails = {
 };
 
 // job application -----------------------------
+const checkPaymentCompletion = {
+  params: Joi.object({
+    id: objectId("Payment ID").required(),
+  }),
+};
+
 const applyJob = {
   body: Joi.object({
     jobPostId: objectId("Job Post ID").required(),
@@ -428,6 +435,11 @@ const applyJob = {
 const requestForRefund = {
   params: Joi.object({
     jobPostId: objectId("Job Post ID").required(),
+  }),
+};
+const generateJobPostPaymentLink = {
+  body: Joi.object({
+    amount: Joi.number().min(1).required(),
   }),
 };
 
@@ -602,4 +614,6 @@ module.exports = {
   requestForRefund,
   sendRefundToHospital,
   viewAllRefundReqAndCompletedReq,
+  checkPaymentCompletion,
+  generateJobPostPaymentLink
 };
