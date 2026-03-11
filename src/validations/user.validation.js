@@ -102,6 +102,8 @@ const editProfile = {
     skill: Joi.array().items(Joi.string().lowercase()).optional(),
     resumeUrl: Joi.string().trim().optional(),
     experience: Joi.number().optional(),
+    education: Joi.string().trim().optional(),
+    educationDoc: Joi.array().items(Joi.string().min(1)).optional(),
 
     bankDetail: Joi.object({
       bankName: Joi.string().lowercase().optional(),

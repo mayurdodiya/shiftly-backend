@@ -206,6 +206,7 @@ module.exports = {
   editProfile: async (req, res) => {
     try {
       const reqBody = req.body;
+      console.log(reqBody, '------------------reqBody')
       const id = req.user._id;
 
       // phone not change

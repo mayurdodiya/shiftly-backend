@@ -77,5 +77,9 @@
   "refund_request_sent": "Refund request submitted",
   "refund_request_already_sent": "Refund request is already sent.",
   "refund_req_after_expire": "You can request a refund once the job has expired.",
-  "payment_success": "Payment successfully proceed."
+  "payment_success": "Payment successfully proceed.",
+  "payment_link": "Payment link generated successfully.",
+  "payment_not_found": "Payment data not found.",
+  "payment_pending": "Payment is not completed.",
+  "payment_already_exist": "Payment is already exist."
 }
