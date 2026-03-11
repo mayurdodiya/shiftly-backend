@@ -28,7 +28,7 @@ router.post("/login", validate(userValidation.adminLogin), userController.adminL
 
 // ------------------------------- PUT routes ------------------------------------------
 // edit user
-router.put("/edit-profile", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.EMPLOYEE, ROLE.ADMIN] }), /* validate(userValidation.editProfile), */ userController.editProfile);
+router.put("/edit-profile", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.EMPLOYEE, ROLE.ADMIN] }), validate(userValidation.editProfile), userController.editProfile);
 
 router.put("/fcm-token", validate(userValidation.updateFcm), userController.updateFcm);
 
