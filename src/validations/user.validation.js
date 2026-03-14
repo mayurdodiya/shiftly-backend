@@ -41,7 +41,8 @@ const register = {
     countryCode: Joi.string().trim(),
     profileImage: Joi.string().trim().optional(),
     education: Joi.string().trim().required(),
-    educationDoc: Joi.array().items(Joi.string().min(1)).required(),
+    // educationDoc: Joi.array().items(Joi.string().min(1)).required(),
+    educationDoc: Joi.any().optional(),
 
     phone: Joi.string()
       .trim()

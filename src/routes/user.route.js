@@ -17,7 +17,16 @@ router.post("/sendOtp", validate(userValidation.sendOtp), userController.sendOtp
 router.post("/verifyOtp", validate(userValidation.verifyOtp), userController.verifyOtp);
 
 // register (upload file is for resume upload only)
-router.post("/signup", upload.single("file"), validate(userValidation.register), userController.register);
+// router.post("/signup", upload.single("file"), validate(userValidation.register), userController.register);
+router.post(
+    "/signup",
+    upload.fields([
+        { name: "file", maxCount: 1 },
+        { name: "educationDoc", maxCount: 10 },
+    ]),
+    validate(userValidation.register),
+    userController.register
+);
 
 // upload single 
 router.post("/upload", upload.single("file"), utils.uploadImage);
