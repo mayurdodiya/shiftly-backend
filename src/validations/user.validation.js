@@ -23,6 +23,8 @@ const bankDetailValidation = Joi.object({
   ifscCode: Joi.string()
     .trim()
     .uppercase()
+    .length(11)
+    // .pattern(/^[A-Z]{4}0[A-Z0-9]{6}$/)
     .required()
     .messages({
       "string.pattern.base": "Invalid IFSC code format",
@@ -40,7 +42,7 @@ const register = {
 
     countryCode: Joi.string().trim(),
     profileImage: Joi.string().trim().optional(),
-    education: Joi.string().trim().required(),
+    education: Joi.string().trim().optional(),
     // educationDoc: Joi.array().items(Joi.string().min(1)).required(),
     educationDoc: Joi.any().optional(),
 

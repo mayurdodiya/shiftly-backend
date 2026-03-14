@@ -5,23 +5,6 @@ const Payment = require("../models/payment.model");
 const { razorpayX } = require("../services/razorpayX"); // ← only razorpayX needed here
 
 
-// Cron job: Runs every night at 11:30 PM
-cron.schedule("30 23 * * *", async () => {
-    try {
-        console.log("Cron job started.")
-        let oneMonthAgo = new Date();
-        oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
-
-        const result = await NotificationModel.deleteMany({
-            createdAt: { $lt: oneMonthAgo }
-        });
-
-        console.log(`🗑️ Deleted ${result.deletedCount} old notifications.`);
-    } catch (error) {
-        console.error("❌ Error deleting old notifications:", error);
-    }
-});
-
 // Cron job: Employee salary payout — runs every day at midnight
 // Cron job: Runs every night at 11:30 PM
 cron.schedule("30 23 * * *", async () => {
@@ -33,6 +16,7 @@ cron.schedule("30 23 * * *", async () => {
         const result = await NotificationModel.deleteMany({
             createdAt: { $lt: oneMonthAgo }
         });
+
         console.log(`🗑️ Deleted ${result.deletedCount} old notifications.`);
     } catch (error) {
         console.error("❌ Error deleting old notifications:", error);
@@ -42,7 +26,7 @@ cron.schedule("30 23 * * *", async () => {
 
 // Cron job: Employee salary payout — runs every day at midnight
 // cron.schedule("0 0 * * *", async () => {
-cron.schedule("10 30 * * * *", async () => {
+cron.schedule("30 28 02 * * * *", async () => {
     try {
         console.log("💸 Employee payout cron started...");
 
@@ -57,7 +41,7 @@ cron.schedule("10 30 * * * *", async () => {
             jobEndDate: { $lte: new Date() },
         }).populate("hiredApplicantId");
 
-        console.log(eligibleJobs[0].hiredApplicantId?.bankDetail, '------------------ find obs for employee payments')
+        console.log(eligibleJobs, '------------------ find obs for employee payments')
         console.log(`📋 Found ${eligibleJobs.length} eligible jobs for payout`);
 
         for (const job of eligibleJobs) {
@@ -102,6 +86,7 @@ cron.schedule("10 30 * * * *", async () => {
                             account_number: employee.bankDetail.accountNumber,
                         },
                     });
+                    console.log(fundAccount,'------------------')
                     console.log(`✅ Fund account created: ${fundAccount.id}`);
                 } catch (err) {
                     console.log(`❌ Failed to create fund account for employee ${employee._id}:`, err.message);

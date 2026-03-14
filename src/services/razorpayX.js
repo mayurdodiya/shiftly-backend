@@ -20,9 +20,9 @@ const razorpayX = {
                 return response.data;
             } catch (error) {
                 // Re-throw with full Razorpay error details
-                const razorpayError = err.response?.data;
+                const razorpayError = error.response?.data;
                 console.log("RazorpayX fundAccount Error:", JSON.stringify(razorpayError, null, 2));
-                throw err;
+                throw error;
             }
         },
     },
@@ -44,9 +44,9 @@ const razorpayX = {
                 return response.data;
             } catch (error) {
                 // Re-throw with full Razorpay error details
-                const razorpayError = err.response?.data;
+                const razorpayError = error.response?.data;
                 console.log("RazorpayX fundAccount Error:", JSON.stringify(razorpayError, null, 2));
-                throw err;
+                throw error;
             }
         },
     },
@@ -70,11 +70,11 @@ const razorpayX = {
                 );
                 return response.data;
 
-            } catch (err) {
+            } catch (error) {
                 // Re-throw with full Razorpay error details
-                const razorpayError = err.response?.data;
+                const razorpayError = error.response?.data;
                 console.log("RazorpayX Payout Error:", JSON.stringify(razorpayError, null, 2));
-                throw err;
+                throw error;
             }
         },
     },

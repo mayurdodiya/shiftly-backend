@@ -8,6 +8,7 @@ module.exports = {
         try {
             const { search, page, limit } = req.query;
             const { user } = req
+            console.log(user._id,'---------------------userId')
 
             const { skip, limit: pageLimit } = getPagination(page, limit);
 
