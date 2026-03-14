@@ -20,10 +20,11 @@ router.post("/verifyOtp", validate(userValidation.verifyOtp), userController.ver
 // router.post("/signup", upload.single("file"), validate(userValidation.register), userController.register);
 router.post(
     "/signup",
-    upload.fields([
-        { name: "file", maxCount: 1 },
-        { name: "educationDoc", maxCount: 10 },
-    ]),
+    // upload.fields([
+    //     { name: "file", maxCount: 1 },
+    //     { name: "educationDoc", maxCount: 10 },
+    // ]),
+    upload.any(),
     validate(userValidation.register),
     userController.register
 );

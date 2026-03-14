@@ -28,7 +28,7 @@ module.exports = {
   registerOLD: async (req, res) => {
     try {
       let reqBody = req.body;
-      console.log(reqBody,'register')
+      console.log(reqBody, 'register')
 
       const otpVarified = await OtpModel.findOne({ phone: reqBody.phone, isVerify: true });
       if (!otpVarified) return apiResponse.BAD_REQUEST({ res, message: message.otp_verify_pending });
@@ -57,49 +57,137 @@ module.exports = {
       return apiResponse.CATCH_ERROR({ res, message: message.something_went_wrong });
     }
   },
+  registerOLD1: async (req, res) => {
+    try {
+      let reqBody = req.body;
+      console.log(reqBody, '-----------------------------')
+      // return;
+
+      // resume upload
+      if (req.files?.file?.length) {
+        reqBody.resumeUrl = req.files.file[0].location;
+      }
+
+      // education documents
+      if (req.files?.educationDoc?.length) {
+        reqBody.educationDoc = req.files.educationDoc.map(
+          (file) => file.location
+        );
+      }
+
+      const otpVarified = await OtpModel.findOne({ phone: reqBody.phone, isVerify: true });
+      if (!otpVarified) return apiResponse.BAD_REQUEST({ res, message: message.otp_verify_pending });
+
+      await OtpModel.deleteOne({ phone: reqBody.phone, isVerify: true });
+
+      const phoneExist = await UserModel.findOne({ phone: reqBody.phone, isActive: true, deletedAt: null });
+      if (phoneExist) return apiResponse.DUPLICATE_VALUE({ res, message: message.phone_already_taken });
+
+      const emailExist = await UserModel.findOne({ email: reqBody.email, isActive: true, deletedAt: null });
+      if (emailExist) return apiResponse.DUPLICATE_VALUE({ res, message: message.email_already_taken });
+
+      let data = await UserModel.create({ ...reqBody });
+
+      const token = await generateToken({ userId: data._id, phone: data.phone });
+
+      data = data.toObject();
+      data.token = token;
+
+      return apiResponse.OK({ res, message: message.user_add_success, data });
+
+    } catch (err) {
+      console.log(err);
+      return apiResponse.CATCH_ERROR({ res, message: message.something_went_wrong });
+    }
+  },
   register: async (req, res) => {
-  try {
-    let reqBody = req.body;
-    console.log(reqBody,'-----------------------------')
-    // return;
+    try {
 
-    // resume upload
-    if (req.files?.file?.length) {
-      reqBody.resumeUrl = req.files.file[0].location;
+      let reqBody = req.body;
+
+      console.log(req.files);
+
+      // resume upload
+      const resumeFile = req.files.find(file => file.fieldname === "file");
+
+      if (resumeFile) {
+        reqBody.resumeUrl = resumeFile.location;
+      }
+
+      // education documents
+      const educationDocs = req.files
+        .filter(file => file.fieldname.startsWith("educationDoc"))
+        .map(file => file.location);
+
+      if (educationDocs.length) {
+        reqBody.educationDoc = educationDocs;
+      }
+
+      const otpVarified = await OtpModel.findOne({
+        phone: reqBody.phone,
+        isVerify: true,
+      });
+
+      if (!otpVarified)
+        return apiResponse.BAD_REQUEST({
+          res,
+          message: message.otp_verify_pending,
+        });
+
+      await OtpModel.deleteOne({
+        phone: reqBody.phone,
+        isVerify: true,
+      });
+
+      const phoneExist = await UserModel.findOne({
+        phone: reqBody.phone,
+        isActive: true,
+        deletedAt: null,
+      });
+
+      if (phoneExist)
+        return apiResponse.DUPLICATE_VALUE({
+          res,
+          message: message.phone_already_taken,
+        });
+
+      const emailExist = await UserModel.findOne({
+        email: reqBody.email,
+        isActive: true,
+        deletedAt: null,
+      });
+
+      if (emailExist)
+        return apiResponse.DUPLICATE_VALUE({
+          res,
+          message: message.email_already_taken,
+        });
+
+      let data = await UserModel.create({ ...reqBody });
+
+      const token = await generateToken({
+        userId: data._id,
+        phone: data.phone,
+      });
+
+      data = data.toObject();
+      data.token = token;
+
+      return apiResponse.OK({
+        res,
+        message: message.user_add_success,
+        data,
+      });
+
+    } catch (err) {
+      console.log(err);
+
+      return apiResponse.CATCH_ERROR({
+        res,
+        message: message.something_went_wrong,
+      });
     }
-
-    // education documents
-    if (req.files?.educationDoc?.length) {
-      reqBody.educationDoc = req.files.educationDoc.map(
-        (file) => file.location
-      );
-    }
-
-    const otpVarified = await OtpModel.findOne({ phone: reqBody.phone, isVerify: true });
-    if (!otpVarified) return apiResponse.BAD_REQUEST({ res, message: message.otp_verify_pending });
-
-    await OtpModel.deleteOne({ phone: reqBody.phone, isVerify: true });
-
-    const phoneExist = await UserModel.findOne({ phone: reqBody.phone, isActive: true, deletedAt: null });
-    if (phoneExist) return apiResponse.DUPLICATE_VALUE({ res, message: message.phone_already_taken });
-
-    const emailExist = await UserModel.findOne({ email: reqBody.email, isActive: true, deletedAt: null });
-    if (emailExist) return apiResponse.DUPLICATE_VALUE({ res, message: message.email_already_taken });
-
-    let data = await UserModel.create({ ...reqBody });
-
-    const token = await generateToken({ userId: data._id, phone: data.phone });
-
-    data = data.toObject();
-    data.token = token;
-
-    return apiResponse.OK({ res, message: message.user_add_success, data });
-
-  } catch (err) {
-    console.log(err);
-    return apiResponse.CATCH_ERROR({ res, message: message.something_went_wrong });
-  }
-},
+  },
 
   updateFcm: async (req, res) => {
     try {
