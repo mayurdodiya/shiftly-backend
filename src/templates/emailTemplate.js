@@ -1,6 +1,5 @@
 const fs = require('fs');
 const path = require('path');
-const logoBase64 = fs.readFileSync(path.join(__dirname, '../uploads/logo.png')).toString('base64');
 
 
 const sendResetPwdLink = (resetLink) => {
