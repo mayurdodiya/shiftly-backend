@@ -4,7 +4,7 @@ const { ROLE } = require("../utils/constant");
 // Admin seeder.
 module.exports = adminSeeder = async () => {
   try {
-    const adminExist = await UserModel.findOne({ phone: process.env.ADMIN_PHONE, deletedAt: null });
+    const adminExist = await UserModel.findOne({ role: ROLE.ADMIN, deletedAt: null });
 
     if (!adminExist) {
       await UserModel.create({

@@ -16,7 +16,7 @@ router.post("/sendOtp", validate(userValidation.sendOtp), userController.sendOtp
 // verify otp
 router.post("/verifyOtp", validate(userValidation.verifyOtp), userController.verifyOtp);
 
-// register
+// register (upload file is for resume upload only)
 router.post("/signup", upload.single("file"), validate(userValidation.register), userController.register);
 
 // upload single 

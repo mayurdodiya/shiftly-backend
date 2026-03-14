@@ -1,7 +1,3 @@
-// if paymentMode jobPost == jobPostId, recruiterId,
-// if paymentMode recruiterRefund == jobPostId, recruiterId,
-// if paymentMode employeePayment == jobPostId, employeeId,
-
 const mongoose = require("mongoose");
 const { RAZORPAY_PAYMENT_STATUS, PAYMENT_MODE } = require("../utils/constant");
 

@@ -47,7 +47,7 @@ async function payoutToEmployee(fundAccountId, amount) {
 
 // create job post payment link (workable)
 async function generatePaymentLinkForCreatePost(data) {
-
+    try {
     const paymentLink = await razorpay.paymentLink.create({
         amount: data.amount * 100,
         currency: "INR",
@@ -68,9 +68,11 @@ async function generatePaymentLinkForCreatePost(data) {
             paymentId: data.paymentId.toString(),
             recruiterId: data.recruiterId.toString(),
             purpose: PAYMENT_MODE.JOB_POST_PAYMENT,
+            jobPostId: data.jobPostId.toString(),
             role: ROLE.HOSPITAL
         },
     });
+    console.log('-------------------------------------------6')
 
     console.log(paymentLink.id, '--------------paymentLink.id')
     console.log(paymentLink, '--------------paymentLink')
@@ -118,6 +120,10 @@ async function generatePaymentLinkForCreatePost(data) {
         notes: paymentLink.notes,
         customer: paymentLink.customer,
         currency: paymentLink.currency,
+    }
+    } catch (error) {
+        console.log(error,'--------------------------')
+        throw error
     }
 }
 

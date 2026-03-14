@@ -1,7 +1,6 @@
 const connectDB = require("../db/dbConnection");
 require("dotenv").config();
 const adminSeeder = require("./admin.seeder");
-const roleSeeder = require("./role.seeder");
 const settingSeeder = require("./setting.seeder");
 
 async function seeder() {

@@ -16,9 +16,8 @@ const multer = require("multer");
 const adminSeeder = require("./seeder/admin.seeder");
 const settingSeeder = require("./seeder/setting.seeder");
 const setSocket = require("./services/socket-io");
+const { webhook, XrazorpayWebhook } = require("./controllers/jobPost.controller");
 
-
-// MIDDLEWARES MUST COME BEFORE SERVER START
 
 app.use(express.json());
 const server = http.createServer(app);
@@ -36,6 +35,8 @@ app.get("/", (req, res) => {
   res.send("Hello world!");
 });
 
+app.post("/webhook", express.raw({ type: "application/json" }), webhook);
+app.post("/xrazorpay-webhook", express.raw({ type: "application/json" }), XrazorpayWebhook);
 app.post("/test", (req, res) => {
   console.log(req.body); // should print body now
   return res.send("ok");

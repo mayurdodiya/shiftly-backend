@@ -54,7 +54,8 @@ const addJobPost = {
     }),
 
     salary: Joi.number().required(),
-    paymentId: objectId("paymentId").required(),
+    // paymentId: objectId("paymentId").required(),
+    // transactionId: Joi.string().required(),
 
     shiftStartTime: Joi.string()
       .trim()
@@ -87,8 +88,6 @@ const addJobPost = {
       }),
 
     isActive: Joi.boolean().default(true),
-    transactionId: Joi.string().required(),
-
   }),
 };
 
@@ -439,7 +438,8 @@ const requestForRefund = {
 };
 const generateJobPostPaymentLink = {
   body: Joi.object({
-    amount: Joi.number().min(1).required(),
+    // amount: Joi.number().min(1).optional(),
+    jobPostId: objectId("Job Post ID").required(),
   }),
 };
 

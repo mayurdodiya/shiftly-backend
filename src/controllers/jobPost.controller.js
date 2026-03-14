@@ -10,6 +10,7 @@ const { sendNotification } = require('./../services/send-noification')
 const { generatePaymentLinkForCreatePost } = require("../services/razorpay");
 const crypto = require("crypto");
 const sendEmail = require("../services/sendgrid");
+const { paymentSuccessFullForClinic, paymentSuccessFullForEmployee, paymentRejectedForEmployee, payoutRejectedAdminAlert, paymentNotificationForAdmin } = require("../templates/emailTemplate");
 
 
 module.exports = {
@@ -20,15 +21,15 @@ module.exports = {
       const { user } = req;
       reqBody.recruiterId = user._id;
 
-      let payment = await PaymentModel.findOne({ _id: reqBody.paymentId });
-      if (!payment) return apiResponse.NOT_FOUND({ res, message: message.payment_not_found });
-      if (payment.paymentStatus !== RAZORPAY_PAYMENT_STATUS.CAPTURED) return apiResponse.BAD_REQUEST({ res, message: message.payment_pending });
-      reqBody.recruiterPaymentId = payment._id;
-      reqBody.paymentStatus = JOB_POST_PAYMENT_STATUS.RECRUITER_PAYMENT_SUCCESS;
+      // let payment = await PaymentModel.findOne({ _id: reqBody.paymentId });
+      // if (!payment) return apiResponse.NOT_FOUND({ res, message: message.payment_not_found });
+      // if (payment.paymentStatus !== RAZORPAY_PAYMENT_STATUS.CAPTURED) return apiResponse.BAD_REQUEST({ res, message: message.payment_pending });
+      // reqBody.recruiterPaymentId = payment._id;
+      // reqBody.paymentStatus = JOB_POST_PAYMENT_STATUS.RECRUITER_PAYMENT_SUCCESS;
 
       // Check recruiter exists
-      const recruiter = await UserModel.findOne({ _id: reqBody.recruiterId, deletedAt: null, isActive: true });
-      if (!recruiter) return apiResponse.NOT_FOUND({ res, message: message.recruiter_not_found });
+      // const recruiter = await UserModel.findOne({ _id: reqBody.recruiterId, deletedAt: null, isActive: true });
+      // if (!recruiter) return apiResponse.NOT_FOUND({ res, message: message.recruiter_not_found });
 
       // expireAt = 1 hour before midnight from jobStartDate
       const jobStartMidnight = moment(reqBody.jobStartDate).startOf("day");
@@ -50,7 +51,7 @@ module.exports = {
       const data = await JobPostModel.create({ ...reqBody });
 
       // add job post id in payment table
-      await PaymentModel.findByIdAndUpdate(payment._id, { jobPostId: data._id })
+      // await PaymentModel.findByIdAndUpdate(payment._id, { jobPostId: data._id })
 
       return apiResponse.OK({ res, message: message.job_post_created, data });
     } catch (err) {
@@ -65,7 +66,7 @@ module.exports = {
 
       const { skip, limit: pageLimit } = getPagination(page, limit);
 
-      let filterArr = [{ deletedAt: null, isActive: true }];
+      let filterArr = [{ deletedAt: null, isActive: true, paymentStatus: { $ne: JOB_POST_PAYMENT_STATUS.RECRUITER_PAYMENT_PENDING } }];
 
       // Search (title, description, skills)
       if (search) {
@@ -156,7 +157,7 @@ module.exports = {
       const { recruiterId, search, status, city, state, minExperience, maxExperience, minSalary, maxSalary, startDate, endDate, page, limit } = req.query;
       const { skip, limit: pageLimit } = getPagination(page, limit);
 
-      let filterArr = [{ isActive: true }];
+      let filterArr = [{ isActive: true, deletedAt: null, paymentStatus: { $ne: JOB_POST_PAYMENT_STATUS.RECRUITER_PAYMENT_PENDING } }];
 
       if (search) {
         const reg = new RegExp(search, "i");
@@ -402,7 +403,7 @@ module.exports = {
   getJobpostOverviewCount: async (req, res) => {
     try {
       const reqBody = req.query
-      const query = { isActive: true, deletedAt: null }
+      const query = { isActive: true, deletedAt: null, paymentStatus: { $ne: JOB_POST_PAYMENT_STATUS.RECRUITER_PAYMENT_PENDING } }
 
       if (reqBody.recruiterId) { query.recruiterId = new Types.ObjectId(reqBody.recruiterId) }
       if (reqBody.applicantId) { query.hiredApplicantId = new Types.ObjectId(reqBody.applicantId) }
@@ -470,6 +471,7 @@ module.exports = {
               $lte: new Date(`${currentYear}-12-31`),
             },
             isActive: true,
+            paymentStatus: { $ne: JOB_POST_PAYMENT_STATUS.RECRUITER_PAYMENT_PENDING }
           },
         },
         {
@@ -1780,17 +1782,25 @@ module.exports = {
   // create payment link by hospital role only
   generateJobPostPaymentLink: async (req, res) => {
     try {
-      const { amount } = req.body;
+      const { /* amount, */ jobPostId } = req.body;
       const { user } = req;
+      console.log('-------------------------------------------1')
 
+      const jobPost = await JobPostModel.findOne({ _id: jobPostId, recruiterId: user._id });
+      if (!jobPost) return apiResponse.NOT_FOUND({ res, message: message.job_post_not_found });
+      const amount = jobPost.salary;
+
+      console.log('-------------------------------------------2')
       const admin = await UserModel.findOne({ role: ROLE.ADMIN });
 
       const payment = await PaymentModel.create({
         senderId: user._id,
         receiverId: admin._id,
+        jobPostId: jobPostId,
         amount,
         paymentMode: PAYMENT_MODE.JOB_POST_PAYMENT
       });
+      console.log('-------------------------------------------3')
 
       const paymentObj = {
         amount: amount,
@@ -1799,11 +1809,14 @@ module.exports = {
         phone: user.phone,
         recruiterId: user._id,
         paymentId: payment._id,
+        jobPostId: jobPostId,
       }
+      console.log('-------------------------------------------4')
 
       // create razorpay payment link
       const paymentLink = await generatePaymentLinkForCreatePost(paymentObj)
 
+      console.log('-------------------------------------------7')
       const response = {
         paymentId: payment._id,
         paymentUrl: paymentLink.paymentUrl,
@@ -1811,6 +1824,7 @@ module.exports = {
         notes: paymentLink.notes,
         customer: paymentLink.customer,
         currency: paymentLink.currency,
+        amount,
       }
 
       return apiResponse.OK({ res, message: message.payment_link, data: response });
@@ -1835,42 +1849,54 @@ module.exports = {
     }
   },
 
-  // after job post payment
+  // razorpay standard after job post payment
   webhook: async (req, res) => {
     try {
+      console.log('---------------------------------------webhook call 1')
+
       // verify Razorpay Signature
       const razorpaySignature = req.headers["x-razorpay-signature"];
       const expectedSignature = crypto
         .createHmac("sha256", process.env.RAZORPAY_WEBHOOK_SECRET)
+        // .update(req.body)
         .update(JSON.stringify(req.body))
         .digest("hex");
 
       if (razorpaySignature !== expectedSignature) {
+        console.log('invalid signature---------------------------------------webhook call 1.5')
         return res.status(400).json({ success: false, message: "Invalid signature" });
       }
 
+      // const { event, payload } = JSON.parse(req.body.toString());
       const { event, payload } = req.body;
+      console.log(event, '---------------------------------------webhook call 2')
+      console.log(payload, '---------------------------------------webhook call 3')
 
-      // handle Events
       switch (event) {
 
         /* PAYMENT SUCCESS */
         case "payment_link.paid": {
+          console.log('---------------------------------------webhook call 4')
           const paymentEntity = payload.payment.entity;
           const notes = paymentEntity.notes || {};
 
+          // Fix: use actual transactionId from payment entity
           const payment = await PaymentModel.findByIdAndUpdate(notes.paymentId, {
-            transactionId: "transactionId",
+            transactionId: paymentEntity.id,
             paymentStatus: RAZORPAY_PAYMENT_STATUS.CAPTURED,
+          }, { new: true }).populate("senderId");
+          await JobPostModel.findByIdAndUpdate(notes.jobPostId, {
+            paymentStatus: JOB_POST_PAYMENT_STATUS.RECRUITER_PAYMENT_SUCCESS,
+            recruiterPaymentId: payment._id,
           });
 
           // send mail for payment confirmation
-          // await sendEmail({
-          //   to: email,
-          //   subject: "Algomatic forgot password request",
-          //   text: `Your Otp is: ${otp}`,
-          //   html: sendOTP(email, otp),
-          // });
+          await sendEmail({
+            to: payment.senderId.email,
+            subject: "Job post Payment successfull",
+            text: `Job post Payment successfull`,
+            html: paymentSuccessFullForClinic(payment.senderId.name, payment._id, payment.transactionId, payment.amount),
+          });
 
           break;
         }
@@ -1880,12 +1906,14 @@ module.exports = {
           const paymentEntity = payload.payment.entity;
           const notes = paymentEntity.notes || {};
 
-          const payment = await PaymentModel.findByIdAndUpdate(notes.paymentId, {
-            transactionId: "transactionId",
+          // Fix: use actual transactionId from payment entity
+          await PaymentModel.findByIdAndUpdate(notes.paymentId, {
+            transactionId: paymentEntity.id,
             paymentStatus: RAZORPAY_PAYMENT_STATUS.FAILED,
           });
 
           // send mail for payment failed
+          // send mail for payment confirmation
           // await sendEmail({
           //   to: email,
           //   subject: "Algomatic forgot password request",
@@ -1898,15 +1926,16 @@ module.exports = {
 
         /* PAYMENT LINK EXPIRED */
         case "payment_link.expired": {
-          const paymentEntity = payload.payment.entity;
-          const notes = paymentEntity.notes || {};
+          // Fix: expired event payload uses payment_link entity, not payment entity
+          const paymentLinkEntity = payload.payment_link.entity;
+          const notes = paymentLinkEntity.notes || {};
 
-          const payment = await PaymentModel.findByIdAndUpdate(notes.paymentId, {
-            transactionId: "transactionId",
+          await PaymentModel.findByIdAndUpdate(notes.paymentId, {
             paymentStatus: RAZORPAY_PAYMENT_STATUS.FAILED,
           });
 
           // send mail for payment link expire
+          // send mail for payment confirmation
           // await sendEmail({
           //   to: email,
           //   subject: "Algomatic forgot password request",
@@ -1925,7 +1954,168 @@ module.exports = {
 
     } catch (error) {
       console.log("Razorpay webhook error:", error);
-      return apiResponse.CATCH_ERROR({ res, message: "Something went wrong", });
+      return apiResponse.CATCH_ERROR({ res, message: "Something went wrong" });
+    }
+  },
+
+  // razorpay x for employee payout
+  XrazorpayWebhook: async (req, res) => {
+    try {
+      console.log('---------------------------------------XrazorpayWebhook call 1')
+
+      const signature = req.headers["x-razorpay-signature"];
+
+      const expectedSignature = crypto
+        .createHmac("sha256", process.env.RAZORPAY_WEBHOOK_SECRET)
+        // .update(req.body)
+        .update(JSON.stringify(req.body))
+        .digest("hex");
+
+      if (signature !== expectedSignature) return res.status(400).json({ success: false, message: "Invalid signature" });
+
+      const event = req.body;
+
+      console.log("Webhook Event:", event.event);
+
+      const payout = event.payload.payout.entity;
+      const jobId = payout.reference_id;
+
+      if (!jobId) return res.status(200).send("No reference id");
+
+      if (event.event === "payout.processed") {
+        const [payment, jobPost, admin] = await Promise.all([
+          // update payment status as captured
+          PaymentModel.findOneAndUpdate(
+            { transactionId: payout.id },
+            { paymentStatus: RAZORPAY_PAYMENT_STATUS.CAPTURED },
+            { new: true }
+          ),
+          // update job post payment status and get job post details
+          JobPostModel.findByIdAndUpdate(jobId, {
+            paymentStatus: JOB_POST_PAYMENT_STATUS.EMPLOYEE_PAYMENT_SUCCESS,
+            employeePaymentId: payment._id,
+          }, { new: true }).populate([
+            {
+              path: "hiredApplicantId",
+            },
+            {
+              path: "recruiterId",
+            }
+          ]).lean(),
+          // admin details
+          UserModel.findOne({ role: ROLE.ADMIN }).lean()
+        ])
+
+        // send emails
+        await Promise.all([
+          // send mail to employe for payment confirmation
+          sendEmail({
+            to: payment?.receiverId?.email,
+            subject: "Payout successfull",
+            text: `Your payout has been processed successfully.`,
+            html: paymentSuccessFullForEmployee(
+              payment?.receiverId?.name,
+              payment?._id,
+              payment?.transactionId,
+              payment?.amount,
+              jobPost?.recruiterId?.name,
+              jobPost?.recruiterId?.address,
+              jobPost?.title,
+              jobPost?.jobStartDate,
+              jobPost?.jobEndDate,
+              jobPost?.totalDays,
+            ),
+          }),
+          // send mail to admin for payment confirmation
+          sendEmail({
+            to: admin?.email,
+            subject: "Payout successfull",
+            text: `Your payout has been processed successfully.`,
+            html: paymentNotificationForAdmin(
+              payment?.receiverId?.name,
+              payment?._id,
+              payment?.transactionId,
+              payment?.amount,
+              jobPost?.recruiterId?.name,
+              jobPost?.recruiterId?.address,
+              jobPost?.title,
+              jobPost?.jobStartDate,
+              jobPost?.jobEndDate,
+              jobPost?.totalDays,
+            ),
+          }),
+        ])
+        console.log("✅ Employee payment success");
+        res.status(200).json({ status: "ok" });
+      }
+
+      if (event.event === "payout.rejected") {
+        const [payment, admin, jobPost] = await Promise.all([
+          // payment
+          PaymentModel.findOneAndUpdate(
+            { transactionId: payout.id },
+            { paymentStatus: RAZORPAY_PAYMENT_STATUS.FAILED },
+            { new: true }
+          ),
+          // admin details
+          UserModel.findOne({ role: ROLE.ADMIN }).lean(),
+          // job post details
+          JobPostModel.findById(jobId).populate([
+            {
+              path: "hiredApplicantId",
+            },
+            {
+              path: "recruiterId",
+            }
+          ]).lean(),
+        ])
+
+        // send emails for payment failure
+        await Promise.all([
+          // send mail for payment failed information to the employee
+          sendEmail({
+            to: admin.email,
+            subject: "Payout Failed Alert",
+            text: `Your payout has been failed due to banking issue.`,
+            html: paymentRejectedForEmployee(
+              jobPost.hiredApplicantId.name,
+              payment._id,
+              payment.transactionId,
+              payment.amount,
+            ),
+          }),
+          // send mail for payment failed information to the employee
+          sendEmail({
+            to: admin.email,
+            subject: "Payout Failed Alert",
+            text: `Your payout has been failed due to banking issue.`,
+            html: payoutRejectedAdminAlert(
+              admin.name,
+              jobId,
+              jobPost.title,
+              jobPost.hiredApplicantId.name,
+              jobPost.hiredApplicantId.email,
+              jobPost.hiredApplicantId.phone,
+              jobPost.hiredApplicantId.bankDetail.bankName,
+              jobPost.hiredApplicantId.bankDetail.branchName,
+              jobPost.hiredApplicantId.bankDetail.accountNumber,
+              jobPost.hiredApplicantId.bankDetail.ifscCode,
+              payment._id,
+              payment.transactionId,
+              payment.amount,
+              jobPost.recruiterId.name,
+              jobPost.recruiterId.email,
+              jobPost.recruiterId.phone,
+            ),
+          })
+        ])
+        console.log("❌ Employee payout failed");
+        res.status(200).json({ status: "ok" });
+      }
+
+    } catch (error) {
+      console.error(error);
+      res.status(500).send("Xrazorpay Webhook error");
     }
   },
 

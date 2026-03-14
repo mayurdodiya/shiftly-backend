@@ -103,3 +103,7 @@ router.get("/:id", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.EMPLOYEE, ROLE.ADMI
 // router.delete("/remove/:postId", auth({ usersAllowed: [ROLE.HOSPITAL] }), postController.deleteJobPost);
 
 module.exports = router;
+// create job post(pending payment) ==> 
+// create payment(jobpostId in payload) ==> 
+// webhook will complete that job post as complete payment ==> 
+// show job post in feed
