@@ -21,8 +21,7 @@ const razorpayX = {
                 return response.data;
             } catch (error) {
                 // Re-throw with full Razorpay error details
-                const razorpayError = error.response?.data;
-                console.log("RazorpayX fundAccount Error:", JSON.stringify(razorpayError, null, 2));
+                console.log("RazorpayX fundAccount Error:", JSON.stringify(error, null, 2));
                 throw error;
             }
         },
@@ -45,8 +44,7 @@ const razorpayX = {
                 return response.data;
             } catch (error) {
                 // Re-throw with full Razorpay error details
-                const razorpayError = error.response?.data;
-                console.log("RazorpayX fundAccount Error:", JSON.stringify(razorpayError, null, 2));
+                console.log("RazorpayX fundAccount Error:", JSON.stringify(error, null, 2));
                 throw error;
             }
         },
@@ -64,8 +62,11 @@ const razorpayX = {
                             username: dbConfig.XRAZORPAY_KEY_ID,
                             password: dbConfig.XRAZORPAY_KEY_SECRET,
                         },
+                        // headers: {
+                        //     "X-Payout-Idempotency": `${data.reference_id}_${Date.now()}`, // prevent duplicate payouts
+                        // }
                         headers: {
-                            "X-Payout-Idempotency": data.reference_id, // prevent duplicate payouts
+                            "X-Payout-Idempotency": `${data.reference_id.toString().slice(-10)}_${Date.now().toString().slice(-6)}`
                         }
                     }
                 );
@@ -73,8 +74,7 @@ const razorpayX = {
 
             } catch (error) {
                 // Re-throw with full Razorpay error details
-                const razorpayError = error.response?.data;
-                console.log("RazorpayX Payout Error:", JSON.stringify(razorpayError, null, 2));
+                console.log("RazorpayX Payout Error:", JSON.stringify(error, null, 2));
                 throw error;
             }
         },
