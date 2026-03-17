@@ -1,5 +1,6 @@
 const { UserModel } = require("../models");
 const { ROLE } = require("../utils/constant");
+const dbConfig = require("../config/dbConfig");
 
 // Admin seeder.
 module.exports = adminSeeder = async () => {
@@ -8,11 +9,11 @@ module.exports = adminSeeder = async () => {
 
     if (!adminExist) {
       await UserModel.create({
-        name: process.env.ADMIN_NAME,
-        email: process.env.ADMIN_EMAIL,
-        countryCode: process.env.ADMIN_COUNTRY_CODE,
-        phone: process.env.ADMIN_PHONE,
-        password: process.env.ADMIN_PASSWORD,
+        name: dbConfig.ADMIN_NAME,
+        email: dbConfig.ADMIN_EMAIL,
+        countryCode: dbConfig.ADMIN_COUNTRY_CODE,
+        phone: dbConfig.ADMIN_PHONE,
+        password: dbConfig.ADMIN_PASSWORD,
         role: ROLE.ADMIN,
       });
     }

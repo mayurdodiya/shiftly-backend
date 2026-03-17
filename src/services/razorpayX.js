@@ -1,5 +1,6 @@
 // Flow 1: RazorpayX — for payouts (admin → employee bank account)
 const axios = require("axios");
+const dbConfig = require("../config/dbConfig");
 
 const razorpayX = {
 
@@ -12,8 +13,8 @@ const razorpayX = {
                     data,
                     {
                         auth: {
-                            username: process.env.XRAZORPAY_KEY_ID,
-                            password: process.env.XRAZORPAY_KEY_SECRET,
+                            username: dbConfig.XRAZORPAY_KEY_ID,
+                            password: dbConfig.XRAZORPAY_KEY_SECRET,
                         },
                     }
                 );
@@ -36,8 +37,8 @@ const razorpayX = {
                     data,
                     {
                         auth: {
-                            username: process.env.XRAZORPAY_KEY_ID,
-                            password: process.env.XRAZORPAY_KEY_SECRET,
+                            username: dbConfig.XRAZORPAY_KEY_ID,
+                            password: dbConfig.XRAZORPAY_KEY_SECRET,
                         },
                     }
                 );
@@ -60,8 +61,8 @@ const razorpayX = {
                     data,
                     {
                         auth: {
-                            username: process.env.XRAZORPAY_KEY_ID,
-                            password: process.env.XRAZORPAY_KEY_SECRET,
+                            username: dbConfig.XRAZORPAY_KEY_ID,
+                            password: dbConfig.XRAZORPAY_KEY_SECRET,
                         },
                         headers: {
                             "X-Payout-Idempotency": data.reference_id, // prevent duplicate payouts

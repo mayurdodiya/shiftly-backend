@@ -3,6 +3,7 @@ const { NotificationModel, JobPostModel, UserModel } = require("../models");
 const { JOB_POST_PAYMENT_STATUS, APPLICATION_STATUS, ROLE, PAYMENT_MODE, RAZORPAY_PAYMENT_STATUS } = require("../utils/constant");
 const Payment = require("../models/payment.model");
 const { razorpayX } = require("../services/razorpayX"); // ← only razorpayX needed here
+const dbConfig = require("../config/dbConfig");
 
 
 // Cron job: Employee salary payout — runs every day at midnight
@@ -21,12 +22,16 @@ cron.schedule("30 23 * * *", async () => {
     } catch (error) {
         console.error("❌ Error deleting old notifications:", error);
     }
-});
+},
+    {
+        timezone: "Asia/Kolkata" // Set timezone to IST
+    }
+);
 
 
 // Cron job: Employee salary payout — runs every day at midnight
 // cron.schedule("0 0 * * *", async () => {
-cron.schedule("30 28 02 * * * *", async () => {
+cron.schedule("40 23 * * *", async () => {
     try {
         console.log("💸 Employee payout cron started...");
 
@@ -86,7 +91,7 @@ cron.schedule("30 28 02 * * * *", async () => {
                             account_number: employee.bankDetail.accountNumber,
                         },
                     });
-                    console.log(fundAccount,'------------------')
+                    console.log(fundAccount, '------------------')
                     console.log(`✅ Fund account created: ${fundAccount.id}`);
                 } catch (err) {
                     console.log(`❌ Failed to create fund account for employee ${employee._id}:`, err.message);
@@ -97,7 +102,7 @@ cron.schedule("30 28 02 * * * *", async () => {
                 let payout;
                 try {
                     payout = await razorpayX.payouts.create({  // ← razorpayX
-                        account_number: process.env.XRAZORPAY_ACCOUNT_NUMBER,
+                        account_number: dbConfig.XRAZORPAY_ACCOUNT_NUMBER,
                         fund_account_id: fundAccount.id,
                         amount: amountInPaise,
                         currency: "INR",
@@ -223,7 +228,7 @@ cron.schedule("30 28 02 * * * *", async () => {
 //                 let payout;
 //                 try {
 //                     payout = await razorpay.payouts.create({
-//                         account_number: process.env.RAZORPAY_ACCOUNT_NUMBER, // your admin X account
+//                         account_number: dbConfig.RAZORPAY_ACCOUNT_NUMBER, // your admin X account
 //                         fund_account_id: fundAccount.id,
 //                         amount: amountInPaise,
 //                         currency: "INR",

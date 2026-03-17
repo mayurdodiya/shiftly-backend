@@ -3,6 +3,7 @@ const apiResponse = require("../utils/api.response");
 const messages = require("../json/message.json");
 const { UserModel } = require("../models");
 const { ROLE } = require("../utils/constant");
+const dbConfig = require("../config/dbConfig");
 
 module.exports = {
   auth: ({ isTokenRequired = true, usersAllowed = [] } = {}) => {
@@ -12,7 +13,7 @@ module.exports = {
       if (isTokenRequired && !token) return apiResponse.BAD_REQUEST({ res, message: messages.token_required });
       if (!isTokenRequired && !token) return next();
       try {
-        let decoded = await jwt.verify(token, process.env.JWT_SECRET);
+        let decoded = await jwt.verify(token, dbConfig.JWT_SECRET);
         let user = await UserModel.findOne({ _id: decoded.userId }).lean();
         if (!user) return apiResponse.UNAUTHORIZED({ res, message: messages.invalid_token });
         req.user = user;

@@ -1,9 +1,10 @@
 const Razorpay = require("razorpay");
 const { ROLE, PAYMENT_MODE } = require("../utils/constant");
+const dbConfig = require("../config/dbConfig");
 
 const razorpay = new Razorpay({
-    key_id: process.env.RAZORPAY_KEY_ID,
-    key_secret: process.env.RAZORPAY_KEY_SECRET,
+    key_id: dbConfig.RAZORPAY_KEY_ID,
+    key_secret: dbConfig.RAZORPAY_KEY_SECRET,
 });
 
 async function createContact(employee) {
@@ -31,7 +32,7 @@ async function createFundAccount(employee) {
 
 async function payoutToEmployee(fundAccountId, amount) {
     return await razorpay.payouts.create({
-        account_number: process.env.RAZORPAY_ACCOUNT_NUMBER,
+        account_number: dbConfig.RAZORPAY_ACCOUNT_NUMBER,
         fund_account_id: fundAccountId,
         amount: amount * 300, // in paise
         currency: "INR",
@@ -61,7 +62,7 @@ async function generatePaymentLinkForCreatePost(data) {
             sms: true,
             email: true,
         },
-        callback_url: `${process.env.APPLICATION_REDIRECT_URL}`,
+        callback_url: `${dbConfig.APPLICATION_REDIRECT_URL}`,
         callback_method: "get",
         
         notes: {
@@ -178,7 +179,7 @@ async function payout() {
 
 // --- Configuration & Initialization ---
 
-// const RAZORPAY_BUSINESS_ACCOUNT_NUMBER = process.env.RAZORPAY_ACCOUNT_NUMBER;
+// const RAZORPAY_BUSINESS_ACCOUNT_NUMBER = dbConfig.RAZORPAY_ACCOUNT_NUMBER;
 // 1. Critical Check: Only initialize Razorpay if keys are present
 
 

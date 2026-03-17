@@ -11,7 +11,7 @@ const { generatePaymentLinkForCreatePost } = require("../services/razorpay");
 const crypto = require("crypto");
 const sendEmail = require("../services/sendgrid");
 const { paymentSuccessFullForClinic, paymentSuccessFullForEmployee, paymentRejectedForEmployee, payoutRejectedAdminAlert, paymentNotificationForAdmin } = require("../templates/emailTemplate");
-
+const dbConfig = require("../config/dbConfig");
 
 module.exports = {
   // Job post ----------------------------------
@@ -1857,7 +1857,7 @@ module.exports = {
       // verify Razorpay Signature
       const razorpaySignature = req.headers["x-razorpay-signature"];
       const expectedSignature = crypto
-        .createHmac("sha256", process.env.RAZORPAY_WEBHOOK_SECRET)
+        .createHmac("sha256", dbConfig.RAZORPAY_WEBHOOK_SECRET)
         // .update(req.body)
         .update(JSON.stringify(req.body))
         .digest("hex");
@@ -1966,7 +1966,7 @@ module.exports = {
       const signature = req.headers["x-razorpay-signature"];
 
       const expectedSignature = crypto
-        .createHmac("sha256", process.env.RAZORPAY_WEBHOOK_SECRET)
+        .createHmac("sha256", dbConfig.RAZORPAY_WEBHOOK_SECRET)
         // .update(req.body)
         .update(JSON.stringify(req.body))
         .digest("hex");

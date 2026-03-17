@@ -1,8 +1,8 @@
 const mongoose = require("mongoose");
-
+const dbConfig = require("../config/dbConfig");
 module.exports = connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGODB_URL, {
+    await mongoose.connect(dbConfig.MONGODB_URL, {
       useNewUrlParser: true,
       autoIndex: true,
       useUnifiedTopology: true,
