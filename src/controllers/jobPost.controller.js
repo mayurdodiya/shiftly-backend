@@ -1897,17 +1897,18 @@ module.exports = {
             transactionId: paymentEntity.id,
             paymentStatus: RAZORPAY_PAYMENT_STATUS.CAPTURED,
           }, { new: true }).populate("senderId");
-          await JobPostModel.findByIdAndUpdate(notes.jobPostId, {
+
+          const job = await JobPostModel.findByIdAndUpdate(notes.jobPostId, {
             paymentStatus: JOB_POST_PAYMENT_STATUS.RECRUITER_PAYMENT_SUCCESS,
             recruiterPaymentId: payment._id,
-          });
+          }, { new: true });
 
           // send mail for payment confirmation
           await sendEmail({
             to: payment.senderId.email,
             subject: "Job post Payment successfull",
             text: `Job post Payment successfull`,
-            html: paymentSuccessFullForClinic(payment.senderId.name, payment._id, payment.transactionId, payment.amount),
+            html: paymentSuccessFullForClinic(job.title, payment.senderId.name, payment._id, payment.transactionId, payment.amount),
           });
 
           break;
@@ -2090,6 +2091,7 @@ module.exports = {
             subject: "Payout Failed Alert",
             text: `Your payout has been failed due to banking issue.`,
             html: paymentRejectedForEmployee(
+              jobPost.title,
               jobPost.hiredApplicantId.name,
               payment._id,
               payment.transactionId,
