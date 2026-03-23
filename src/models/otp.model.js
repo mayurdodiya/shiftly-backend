@@ -10,11 +10,13 @@ const otpSchema = mongoose.Schema(
     phone: {
       type: String,
       trim: true,
-      lowercase: true,
+      required: true,
+      trim: true,
     },
     otp: {
       type: String,
       trim: true,
+      required: true,
     },
     isVerify: {
       type: Boolean,
@@ -39,6 +41,6 @@ otpSchema.statics.isPhoneTaken = async function (phone, excludeUserId) {
   const user = await this.findOne({ phone, _id: { $ne: excludeUserId } });
   return !!user;
 };
-
+otpSchema.index({ expiryTime: 1 }, { expireAfterSeconds: 0 });
 const Otp = mongoose.model("otp", otpSchema, "otp");
 module.exports = Otp;

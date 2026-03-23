@@ -1,17 +1,17 @@
-const message = require("../json/message.json");
 const { JobPostModel, UserModel, SettingModel, JobApplicationModel, NotificationModel, PaymentModel } = require("../models");
-const apiResponse = require("../utils/api.response");
-const mongoose = require("mongoose");
-const { Types } = mongoose;
-const moment = require("moment");
-const { getPagination, pagingData } = require("../utils/utils");
 const { APPLICATION_STATUS, ROLE, PAYMENT_MODE, RAZORPAY_PAYMENT_STATUS, JOB_POST_PAYMENT_STATUS } = require("../utils/constant");
 const { sendNotification } = require('./../services/send-noification')
 const { generatePaymentLinkForCreatePost } = require("../services/razorpay");
-const crypto = require("crypto");
 const sendEmail = require("../services/sendgrid");
 const { paymentSuccessFullForClinic, paymentSuccessFullForEmployee, paymentRejectedForEmployee, payoutRejectedAdminAlert, paymentNotificationForAdmin } = require("../templates/emailTemplate");
+const { getPagination, pagingData } = require("../utils/utils");
+const apiResponse = require("../utils/api.response");
+const message = require("../json/message.json");
 const dbConfig = require("../config/dbConfig");
+const moment = require("moment");
+const mongoose = require("mongoose");
+const { Types } = mongoose;
+const crypto = require("crypto");
 
 module.exports = {
   // Job post ----------------------------------
@@ -1705,6 +1705,18 @@ module.exports = {
       if (job.hiredApplicantId != user._id.toString()) return apiResponse.UNAUTHORIZED({ res, message: message.you_not_hired_for_job });
       if (job.status == APPLICATION_STATUS.COMPLETED) return apiResponse.VALIDATION_ERROR({ res, message: message.already_completed_job });
       if (job.status !== APPLICATION_STATUS.START_WORKING) return apiResponse.VALIDATION_ERROR({ res, message: message.job_not_start });
+
+      // NEW VALIDATION (IMPORTANT)
+      const currentDateTime = moment();
+
+      const jobEndDateTime = moment(job.jobEndDate)
+        .set({
+          hour: parseInt(job.shiftEndTime.split(":")[0]),
+          minute: parseInt(job.shiftEndTime.split(":")[1]),
+          second: 0,
+        });
+
+      if (currentDateTime.isBefore(jobEndDateTime)) return apiResponse.VALIDATION_ERROR({ res, message: "You can complete the shift only after it ends.", });
 
       await JobPostModel.findOneAndUpdate({ _id: id }, { status: APPLICATION_STATUS.COMPLETED });
 
