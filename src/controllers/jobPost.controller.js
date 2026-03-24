@@ -1698,48 +1698,38 @@ module.exports = {
   completeJobByEmployee: async (req, res) => {
     try {
       const id = req.params.jobPostId;
-      console.log('-------------------------------------------1')
       const { user } = req;
 
       const job = await JobPostModel.findOne({ _id: id }).populate("recruiterId", "_id name fcmToken").lean();
-      console.log('-------------------------------------------2')
       if (!job) return apiResponse.NOT_FOUND({ res, message: message.job_post_not_found });
       if (job.hiredApplicantId != user._id.toString()) return apiResponse.UNAUTHORIZED({ res, message: message.you_not_hired_for_job });
       if (job.status == APPLICATION_STATUS.COMPLETED) return apiResponse.VALIDATION_ERROR({ res, message: message.already_completed_job });
       if (job.status !== APPLICATION_STATUS.START_WORKING) return apiResponse.VALIDATION_ERROR({ res, message: message.job_not_start });
-      console.log('-------------------------------------------3')
 
       // NEW VALIDATION (IMPORTANT)
       const currentDateTime = moment();
-      // .tz("Asia/Kolkata");
 
       const jobEndDateTime = moment(job.jobEndDate)
-        // .tz("Asia/Kolkata")
         .set({
           hour: parseInt(job.shiftEndTime.split(":")[0]),
           minute: parseInt(job.shiftEndTime.split(":")[1]),
           second: 0,
         });
-      console.log(typeof currentDateTime.isBefore(jobEndDateTime), '-------------------------------------------4')
 
       const isBefore = currentDateTime.isBefore(jobEndDateTime);
-      console.log(isBefore, '-------------------------------------------5.5')
       if (isBefore) return apiResponse.BAD_REQUEST({ res, message: "You can complete the shift only after it ends.", });
 
       await JobPostModel.findOneAndUpdate({ _id: id }, { status: APPLICATION_STATUS.COMPLETED });
-      console.log('-------------------------------------------5')
 
       // notification
       const title = "Shift Completed"
       const msg = `${user.name} has completed their duty at your hospital.`
 
-      console.log('-------------------------------------------6')
       await Promise.all([
         sendNotification(job.recruiterId.fcmToken, title, msg),
         NotificationModel.create({ userId: job.recruiterId._id, title: title, body: msg, })
       ])
 
-      console.log('-------------------------------------------7')
       return apiResponse.OK({ res, message: message.application_status_updated });
     } catch (err) {
       console.log("Error fetching job posts", err);
