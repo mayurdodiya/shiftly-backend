@@ -1718,7 +1718,7 @@ module.exports = {
         minute: parseInt(job.shiftEndTime.split(":")[1]),
         second: 0,
       });
-      console.log(currentDateTime.isBefore(jobEndDateTime),'-------------------------------------------4')
+      console.log(typeof currentDateTime.isBefore(jobEndDateTime),'-------------------------------------------4')
       
       if (currentDateTime.isBefore(jobEndDateTime)) return apiResponse.VALIDATION_ERROR({ res, message: "You can complete the shift only after it ends.", });
       console.log('-------------------------------------------5')
