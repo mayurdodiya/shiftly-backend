@@ -1710,10 +1710,11 @@ module.exports = {
       console.log('-------------------------------------------3')
 
       // NEW VALIDATION (IMPORTANT)
-      const currentDateTime = moment().tz("Asia/Kolkata");
+      const currentDateTime = moment();
+      // .tz("Asia/Kolkata");
 
       const jobEndDateTime = moment(job.jobEndDate)
-        .tz("Asia/Kolkata")
+        // .tz("Asia/Kolkata")
         .set({
           hour: parseInt(job.shiftEndTime.split(":")[0]),
           minute: parseInt(job.shiftEndTime.split(":")[1]),
@@ -1721,8 +1722,9 @@ module.exports = {
         });
       console.log(typeof currentDateTime.isBefore(jobEndDateTime), '-------------------------------------------4')
 
-      if (currentDateTime.isBefore(jobEndDateTime)) return apiResponse.BAD_REQUEST({ res, message: "You can complete the shift only after it ends.", });
-      console.log('-------------------------------------------5')
+      const isBefore = currentDateTime.isBefore(jobEndDateTime);
+      console.log(isBefore, '-------------------------------------------5.5')
+      if (isBefore) return apiResponse.BAD_REQUEST({ res, message: "You can complete the shift only after it ends.", });
 
       await JobPostModel.findOneAndUpdate({ _id: id }, { status: APPLICATION_STATUS.COMPLETED });
       console.log('-------------------------------------------5')
