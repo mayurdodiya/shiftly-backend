@@ -1720,7 +1720,7 @@ module.exports = {
       });
       console.log(currentDateTime.isBefore(jobEndDateTime),'-------------------------------------------4')
       
-      // if (currentDateTime.isBefore(jobEndDateTime)) return apiResponse.VALIDATION_ERROR({ res, message: "You can complete the shift only after it ends.", });
+      if (currentDateTime.isBefore(jobEndDateTime)) return apiResponse.VALIDATION_ERROR({ res, message: "You can complete the shift only after it ends.", });
       console.log('-------------------------------------------5')
       
       await JobPostModel.findOneAndUpdate({ _id: id }, { status: APPLICATION_STATUS.COMPLETED });
