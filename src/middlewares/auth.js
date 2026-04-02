@@ -4,6 +4,7 @@ const messages = require("../json/message.json");
 const { UserModel } = require("../models");
 const { ROLE } = require("../utils/constant");
 const dbConfig = require("../config/dbConfig");
+// test
 
 module.exports = {
   auth: ({ isTokenRequired = true, usersAllowed = [] } = {}) => {
