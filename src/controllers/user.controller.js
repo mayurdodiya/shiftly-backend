@@ -129,22 +129,17 @@ module.exports = {
         reqBody.educationDoc = educationDocs;
       }
 
-      const otpVarified = await OtpModel.findOne({
-        phone: reqBody.phone,
-        isVerify: true,
-      });
+      // const otpVarified = await OtpModel.findOne({
+      //   phone: reqBody.phone,
+      //   isVerify: true,
+      // });
 
-      console.log(otpVarified,'-------------otpVarified')
-      if (!otpVarified)
-        return apiResponse.BAD_REQUEST({
-          res,
-          message: message.otp_verify_pending,
-        });
-
-      await OtpModel.deleteOne({
-        phone: reqBody.phone,
-        isVerify: true,
-      });
+      // console.log(otpVarified, '-------------otpVarified')
+      // if (!otpVarified)
+      //   return apiResponse.BAD_REQUEST({
+      //     res,
+      //     message: message.otp_verify_pending,
+      //   });
 
       const phoneExist = await UserModel.findOne({
         phone: reqBody.phone,
@@ -179,6 +174,8 @@ module.exports = {
 
       data = data.toObject();
       data.token = token;
+
+      await OtpModel.deleteOne({ phone: reqBody.phone, isVerify: true });
 
       return apiResponse.OK({
         res,
