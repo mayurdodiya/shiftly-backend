@@ -110,6 +110,11 @@ module.exports = {
 
       // resume upload
       const resumeFile = req.files.find(file => file.fieldname === "file");
+      const profileUrl = req.files.find(file => file.fieldname === "profileImage");
+
+      if (profileUrl) {
+        reqBody.profileImage = profileUrl.location;
+      }
 
       if (resumeFile) {
         reqBody.resumeUrl = resumeFile.location;
@@ -129,11 +134,11 @@ module.exports = {
         isVerify: true,
       });
 
-      if (!otpVarified)
-        return apiResponse.BAD_REQUEST({
-          res,
-          message: message.otp_verify_pending,
-        });
+      // if (!otpVarified)
+      //   return apiResponse.BAD_REQUEST({
+      //     res,
+      //     message: message.otp_verify_pending,
+      //   });
 
       await OtpModel.deleteOne({
         phone: reqBody.phone,
@@ -274,6 +279,7 @@ module.exports = {
 
   verifyOtp: async (req, res) => {
     try {
+      console.log('verifyOtp ---------------------1')
       const { phone, otp, fcmToken } = req.body;
 
       const otpData = await OtpModel.findOne({ phone });
@@ -296,6 +302,7 @@ module.exports = {
         await UserModel.findByIdAndUpdate(user._id, { fcmToken: fcmToken })
       }
 
+      console.log('verifyOtp ---------------------2')
       return apiResponse.OK({ res, message: message.otp_verified, data: user });
     } catch (err) {
       console.log(err);
