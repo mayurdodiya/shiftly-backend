@@ -2216,7 +2216,7 @@ module.exports = {
         return apiResponse.VALIDATION_ERROR({ res, message: message.refund_payment_image_required });
       }
 
-      await JobPostModel.findByIdAndUpdate(jobPostId, { refundUrl: refundUrl, status: APPLICATION_STATUS.REFUND_COMPLETED })
+      await JobPostModel.findByIdAndUpdate(jobPostId, { refundUrl: refundUrl, status: APPLICATION_STATUS.REFUND_COMPLETED, paymentStatus: JOB_POST_PAYMENT_STATUS.RECRUITER_REFUND_SUCCESS })
 
       // notification
       const title = "Refund Credited"

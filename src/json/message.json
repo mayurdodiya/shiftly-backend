@@ -5,7 +5,7 @@
   "transaction_not_found": "Transaction not found.",
   "user_not_verify": "User not verify.",
   "invalid_token": "Invalid Token",
-  "token_required": "Token required.",
+  "token_required": "Token required",
   "email_already_taken": "Email is already exist.",
   "phone_already_taken": "Phone no is already exist.",
   "something_went_wrong": "Something went to wrong, please try again later.",
