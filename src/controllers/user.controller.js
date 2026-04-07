@@ -134,11 +134,12 @@ module.exports = {
         isVerify: true,
       });
 
-      // if (!otpVarified)
-      //   return apiResponse.BAD_REQUEST({
-      //     res,
-      //     message: message.otp_verify_pending,
-      //   });
+      console.log(otpVarified,'-------------otpVarified')
+      if (!otpVarified)
+        return apiResponse.BAD_REQUEST({
+          res,
+          message: message.otp_verify_pending,
+        });
 
       await OtpModel.deleteOne({
         phone: reqBody.phone,
