@@ -258,7 +258,7 @@ module.exports = {
       //   return apiResponse.NOT_ACCEPTABLE({ res, message: sendOtpTOPhone.message || message.otp_sending_failed });
       // }
       
-      otp = otp || "0000";
+      let otp = "0000";
       await OtpModel.findOneAndUpdate({ phone }, { otp: otp, expiryTime: new Date(Date.now() + 1 * 60 * 1000) }, { upsert: true, new: true })
       return apiResponse.OK({ res, message: message.otp_sent_phone });
     } catch (err) {
