@@ -246,18 +246,21 @@ module.exports = {
     try {
       const { phone } = req.body;
       
-      let otp = Math.floor(1000 + Math.random() * 9000);
+      // let otp = Math.floor(1000 + Math.random() * 9000);
+      // otp = otp || "0000";
+      
+      // const sendOtpTOPhone = await sendOTP(phone, otp)
+      
+      // if (sendOtpTOPhone.type === "success") {
+      //   await OtpModel.findOneAndUpdate({ phone }, { otp: otp, expiryTime: new Date(Date.now() + 1 * 60 * 1000) }, { upsert: true, new: true })
+      //   return apiResponse.OK({ res, message: message.otp_sent_phone });
+      // } else {
+      //   return apiResponse.NOT_ACCEPTABLE({ res, message: sendOtpTOPhone.message || message.otp_sending_failed });
+      // }
+      
       otp = otp || "0000";
-
-      const sendOtpTOPhone = await sendOTP(phone, otp)
-
-      if (sendOtpTOPhone.type === "success") {
-        await OtpModel.findOneAndUpdate({ phone }, { otp: otp, expiryTime: new Date(Date.now() + 1 * 60 * 1000) }, { upsert: true, new: true })
-        return apiResponse.OK({ res, message: message.otp_sent_phone });
-      } else {
-        return apiResponse.NOT_ACCEPTABLE({ res, message: sendOtpTOPhone.message || message.otp_sending_failed });
-      }
-
+      await OtpModel.findOneAndUpdate({ phone }, { otp: otp, expiryTime: new Date(Date.now() + 1 * 60 * 1000) }, { upsert: true, new: true })
+      return apiResponse.OK({ res, message: message.otp_sent_phone });
     } catch (err) {
       console.log(err);
       return apiResponse.CATCH_ERROR({ res, message: message.something_went_wrong });
