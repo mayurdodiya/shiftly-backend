@@ -45,6 +45,7 @@
   "plan_updated_success": "Strategy plan updated successfully.",
   "plan_deleted_success": "Strategy plan deleted successfully.",
   "otp_sent_email": "OTP sent on your registered email.",
+  "otp_sending_failed": "Unable to send OTP. Please try after sometime.",
   "otp_sent_phone": "We’ve sent an OTP to your registered mobile number. Please verify it within 1 minute",
   "otp_invalid": "Otp is invalid.",
   "otp_expired": "Otp is expired.",

@@ -4,7 +4,8 @@ const apiResponse = require("../utils/api.response");
 const { comparePassword, generateToken, getPagination, pagingData, hashPassword } = require("../utils/utils");
 const { APPLICATION_STATUS, ROLE } = require("../utils/constant");
 const dbConfig = require("../config/dbConfig");
-// const sendOTP = require("../services/sms")
+const sendOTP = require("../services/sms")
+
 
 module.exports = {
   adminLogin: async (req, res) => {
@@ -244,31 +245,19 @@ module.exports = {
   sendOtp: async (req, res) => {
     try {
       const { phone } = req.body;
-      // const sendSuccess = await sendOTP(phone, "1234")
-      // console.log(sendSuccess,'--------------------sendSuccess')
-      // const user = await OtpModel.findOne({ phone, deletedAt: null });
-      // if (!user) {
-      //   return apiResponse.NOT_FOUND({ res, message: message.phone_not_found });
-      // }
+      
+      let otp = Math.floor(1000 + Math.random() * 9000);
+      otp = otp || "0000";
 
-      // const otp = Math.floor(1000 + Math.random() * 9000);
-      const otp = "0000";
-      // send otp with the tool pending******
+      const sendOtpTOPhone = await sendOTP(phone, otp)
 
+      if (sendOtpTOPhone.type === "success") {
+        await OtpModel.findOneAndUpdate({ phone }, { otp: otp, expiryTime: new Date(Date.now() + 1 * 60 * 1000) }, { upsert: true, new: true })
+        return apiResponse.OK({ res, message: message.otp_sent_phone });
+      } else {
+        return apiResponse.NOT_ACCEPTABLE({ res, message: sendOtpTOPhone.message || message.otp_sending_failed });
+      }
 
-
-      await Promise.all([
-        OtpModel.findOneAndUpdate({ phone }, { otp: otp, expiryTime: new Date(Date.now() + 1 * 60 * 1000) }, { upsert: true, new: true }),
-        // send otp in phone number
-        // sendEmail({
-        //   to: email,
-        //   subject: "Algomatic forgot password request",
-        //   text: `Your Otp is: ${otp}`,
-        //   html: sendOTP(email, otp),
-        // }),
-      ]);
-
-      return apiResponse.OK({ res, message: message.otp_sent_phone });
     } catch (err) {
       console.log(err);
       return apiResponse.CATCH_ERROR({ res, message: message.something_went_wrong });
