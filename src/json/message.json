@@ -3,6 +3,7 @@
   "phone_not_found": "Phone no not found.",
   "user_not_found": "User not found.",
   "transaction_not_found": "Transaction not found.",
+  "otp_verification_issue": "OTP verification failed. Please contact support team.",
   "user_not_verify": "User not verify.",
   "invalid_token": "Invalid Token",
   "token_required": "Token required",

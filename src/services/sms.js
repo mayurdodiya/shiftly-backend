@@ -1,4 +1,7 @@
 const axios = require('axios');
+const MSG91_AUTH_KEY = process.env.MSG91_AUTH_KEY
+const MSG91_TEMPLATE_ID_FOR_24_HOURS = process.env.MSG91_TEMPLATE_ID_FOR_24_HOURS
+
 
 // send otp for 10am to 9pm only
 const sendOTPOfficialTime = async (mobileNumber) => {
@@ -27,8 +30,6 @@ const sendOTPOfficialTime = async (mobileNumber) => {
 
 const sendOTP = async (mobileNumber, otp) => {
     try {
-        const MSG91_TEMPLATE_ID_FOR_24_HOURS = process.env.MSG91_TEMPLATE_ID_FOR_24_HOURS
-        const MSG91_AUTH_KEY = process.env.MSG91_AUTH_KEY
         const response = await axios.post(
             `https://control.msg91.com/api/v5/otp?template_id=${MSG91_TEMPLATE_ID_FOR_24_HOURS}&mobile=91${mobileNumber}&authkey=${MSG91_AUTH_KEY}`,
             {
@@ -48,5 +49,27 @@ const sendOTP = async (mobileNumber, otp) => {
     }
 };
 
+const verifyMsg91Otp = async (mobileNumber, otp) => {
+    try {
+        const response = await axios.post(
+            'https://control.msg91.com/api/v5/otp/verify',
+            {
+                otp: otp,
+                mobile: `91${mobileNumber}`,
+            },
+            {
+                headers: {
+                    authkey: MSG91_AUTH_KEY,
+                },
+            }
+        );
+        console.log('OTP Sent:', response.data);
+        return response.data;
+    } catch (error) {
+        console.error('Error:', error.response?.data || error.message);
+        throw error.response?.data || error.message;
+    }
+};
 
-module.exports = sendOTP;
+
+module.exports = { sendOTP, verifyMsg91Otp };

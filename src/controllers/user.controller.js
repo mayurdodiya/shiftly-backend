@@ -4,7 +4,7 @@ const apiResponse = require("../utils/api.response");
 const { comparePassword, generateToken, getPagination, pagingData, hashPassword } = require("../utils/utils");
 const { APPLICATION_STATUS, ROLE } = require("../utils/constant");
 const dbConfig = require("../config/dbConfig");
-const sendOTP = require("../services/sms")
+const msg91Services = require("../services/sms")
 
 
 module.exports = {
@@ -245,22 +245,26 @@ module.exports = {
   sendOtp: async (req, res) => {
     try {
       const { phone } = req.body;
+
+      let otp = Math.floor(1000 + Math.random() * 9000);
+      otp = otp || "0000";
+
+      const sendOtpTOPhone = await msg91Services.sendOTP(phone, otp)
+      console.log(sendOtpTOPhone,'------------------ sendOtpTOPhone 1')
       
-      // let otp = Math.floor(1000 + Math.random() * 9000);
-      // otp = otp || "0000";
-      
-      // const sendOtpTOPhone = await sendOTP(phone, otp)
-      
-      // if (sendOtpTOPhone.type === "success") {
-      //   await OtpModel.findOneAndUpdate({ phone }, { otp: otp, expiryTime: new Date(Date.now() + 1 * 60 * 1000) }, { upsert: true, new: true })
-      //   return apiResponse.OK({ res, message: message.otp_sent_phone });
-      // } else {
-      //   return apiResponse.NOT_ACCEPTABLE({ res, message: sendOtpTOPhone.message || message.otp_sending_failed });
-      // }
-      
-      let otp = "0000";
-      await OtpModel.findOneAndUpdate({ phone }, { otp: otp, expiryTime: new Date(Date.now() + 1 * 60 * 1000) }, { upsert: true, new: true })
-      return apiResponse.OK({ res, message: message.otp_sent_phone });
+      if (sendOtpTOPhone.type === "success") {
+        console.log('------------------ 2')
+        await OtpModel.findOneAndUpdate({ phone }, { otp: otp, expiryTime: new Date(Date.now() + 1 * 60 * 1000) }, { upsert: true, new: true })
+        console.log('------------------ 3')
+        return apiResponse.OK({ res, message: message.otp_sent_phone });
+      } else {
+        console.log('------------------ 4')
+        return apiResponse.NOT_ACCEPTABLE({ res, message: sendOtpTOPhone.message || message.otp_sending_failed });
+      }
+
+      // let otp = "0000";
+      // await OtpModel.findOneAndUpdate({ phone }, { otp: otp, expiryTime: new Date(Date.now() + 1 * 60 * 1000) }, { upsert: true, new: true })
+      // return apiResponse.OK({ res, message: message.otp_sent_phone });
     } catch (err) {
       console.log(err);
       return apiResponse.CATCH_ERROR({ res, message: message.something_went_wrong });
@@ -272,25 +276,45 @@ module.exports = {
       console.log('verifyOtp ---------------------1')
       const { phone, otp, fcmToken } = req.body;
 
-      const otpData = await OtpModel.findOne({ phone });
-      if (!otpData) return apiResponse.NOT_FOUND({ res, message: message.phone_not_found });
-      if (otpData.expiryTime < new Date()) return apiResponse.NOT_FOUND({ res, message: message.otp_expired });
-      if (otpData.otp !== otp) return apiResponse.BAD_REQUEST({ res, message: message.invalid_otp });
+      const msg91OtpVerification = await msg91Services.verifyMsg91Otp(phone, otp)
+      if (msg91OtpVerification.type === 'success') {
+        let user = {};
+        user = await UserModel.findOne({ phone: phone }).lean();
+        if (user) {
+          user.isNewUser = false;
+          const token = generateToken({ userId: user._id, phone: user.phone });
+          user.token = token;
+        } else {
+          user = { isNewUser: true };
+        }
 
-      await OtpModel.findOneAndUpdate({ _id: otpData._id }, { $set: { expiryTime: new Date(), isVerify: true } }, { upsert: true }, { new: true });
-      let user = {};
-      user = await UserModel.findOne({ phone: phone }).lean();
-      if (user) {
-        user.isNewUser = false;
-        const token = generateToken({ userId: user._id, phone: user.phone });
-        user.token = token;
-      } else {
-        user = { isNewUser: true };
+        if (user.isNewUser == false) {
+          await UserModel.findByIdAndUpdate(user._id, { fcmToken: fcmToken })
+        }
+        return apiResponse.OK({ res, message: message.otp_verified, data: user });
+      } else if (msg91OtpVerification.type === 'error') {
+        return apiResponse.NOT_ACCEPTABLE({ res, message: message.msg91OtpVerification.message || message.otp_verification_issue });
       }
 
-      if (user.isNewUser == false) {
-        await UserModel.findByIdAndUpdate(user._id, { fcmToken: fcmToken })
-      }
+      // const otpData = await OtpModel.findOne({ phone });
+      // if (!otpData) return apiResponse.NOT_FOUND({ res, message: message.phone_not_found });
+      // if (otpData.expiryTime < new Date()) return apiResponse.NOT_FOUND({ res, message: message.otp_expired });
+      // if (otpData.otp !== otp) return apiResponse.BAD_REQUEST({ res, message: message.invalid_otp });
+
+      // await OtpModel.findOneAndUpdate({ _id: otpData._id }, { $set: { expiryTime: new Date(), isVerify: true } }, { upsert: true }, { new: true });
+      // let user = {};
+      // user = await UserModel.findOne({ phone: phone }).lean();
+      // if (user) {
+      //   user.isNewUser = false;
+      //   const token = generateToken({ userId: user._id, phone: user.phone });
+      //   user.token = token;
+      // } else {
+      //   user = { isNewUser: true };
+      // }
+
+      // if (user.isNewUser == false) {
+      //   await UserModel.findByIdAndUpdate(user._id, { fcmToken: fcmToken })
+      // }
 
       console.log('verifyOtp ---------------------2')
       return apiResponse.OK({ res, message: message.otp_verified, data: user });
