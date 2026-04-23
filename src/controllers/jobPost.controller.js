@@ -1707,9 +1707,9 @@ module.exports = {
       if (job.status !== APPLICATION_STATUS.START_WORKING) return apiResponse.VALIDATION_ERROR({ res, message: message.job_not_start });
 
       // NEW VALIDATION (IMPORTANT)
-      const currentDateTime = moment();
+      const currentDateTime = moment.utc();
 
-      const jobEndDateTime = moment(job.jobEndDate)
+      const jobEndDateTime = moment.utc(job.jobEndDate)
         .set({
           hour: parseInt(job.shiftEndTime.split(":")[0]),
           minute: parseInt(job.shiftEndTime.split(":")[1]),
