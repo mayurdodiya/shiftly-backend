@@ -21,6 +21,10 @@ const jobPostSchema = mongoose.Schema(
       type: String,
       trim: true,
     },
+    subProfession: {
+      type: String,
+      trim: true,
+    },
     skills: [
       {
         type: String,

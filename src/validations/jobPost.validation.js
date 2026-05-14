@@ -20,6 +20,7 @@ const addJobPost = {
   body: Joi.object().keys({
     title: Joi.string().trim().lowercase().required(),
     profession: Joi.string().trim().lowercase().optional(),
+    subProfession: Joi.string().trim().lowercase().optional(),
 
     description: Joi.string().trim().lowercase().allow("", null),
 
