@@ -18,6 +18,7 @@ module.exports = {
   addJobPost: async (req, res) => {
     try {
       const reqBody = req.body;
+      console.log(reqBody,'-------------------------------------1')
       const { user } = req;
       reqBody.recruiterId = user._id;
 
@@ -55,7 +56,7 @@ module.exports = {
 
       return apiResponse.OK({ res, message: message.job_post_created, data });
     } catch (err) {
-      console.log(err);
+      console.log(err,'-------------------------------------2');
       return apiResponse.CATCH_ERROR({ res, message: message.something_went_wrong });
     }
   },
