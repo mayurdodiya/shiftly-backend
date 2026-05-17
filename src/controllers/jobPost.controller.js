@@ -181,7 +181,15 @@ module.exports = {
       const { recruiterId, search, status, city, state, minExperience, maxExperience, minSalary, maxSalary, startDate, endDate, page, limit } = req.query;
       const { skip, limit: pageLimit } = getPagination(page, limit);
 
-      let filterArr = [{ isActive: true, deletedAt: null, paymentStatus: { $ne: JOB_POST_PAYMENT_STATUS.RECRUITER_PAYMENT_PENDING } }];
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      let filterArr = [
+        {
+          isActive: true,
+          deletedAt: null,
+          paymentStatus: { $ne: JOB_POST_PAYMENT_STATUS.RECRUITER_PAYMENT_PENDING },
+          jobStartDate: { $gte: today }
+        }];
 
       if (search) {
         const reg = new RegExp(search, "i");
