@@ -45,6 +45,8 @@ router.put("/fcm-token", validate(userValidation.updateFcm), userController.upda
 // update commission percentage
 router.put("/set-commission-percentage", auth({ usersAllowed: [ROLE.ADMIN] }), validate(userValidation.setCommissionPercentage), userController.setCommissionPercentage);
 
+router.put("/active-inactive/:id", auth({ usersAllowed: [ROLE.ADMIN] }), validate(userValidation.activeInactiveUser), userController.activeInactiveUser);
+
 // ------------------------------- GET routes ------------------------------------------
 // get setting details
 router.get("/setting", auth({ usersAllowed: [ROLE.HOSPITAL, ROLE.ADMIN] }), userController.getSetting);

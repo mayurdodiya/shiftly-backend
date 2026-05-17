@@ -18,7 +18,7 @@ module.exports = {
   addJobPost: async (req, res) => {
     try {
       const reqBody = req.body;
-      console.log(reqBody,'-------------------------------------1')
+      console.log(reqBody, '-------------------------------------1')
       const { user } = req;
       reqBody.recruiterId = user._id;
 
@@ -56,7 +56,7 @@ module.exports = {
 
       return apiResponse.OK({ res, message: message.job_post_created, data });
     } catch (err) {
-      console.log(err,'-------------------------------------2');
+      console.log(err, '-------------------------------------2');
       return apiResponse.CATCH_ERROR({ res, message: message.something_went_wrong });
     }
   },
@@ -64,6 +64,17 @@ module.exports = {
   getAllJobPost: async (req, res) => {
     try {
       const { isActive, recruiterId, search, status, city, state, minExperience, maxExperience, minSalary, maxSalary, startDate, endDate, page, limit } = req.query;
+      const userIsActive = await UserModel.findOne({ _id: req.user._id });
+      if (userIsActive.isActive == false) {
+        const obj = {
+          totalRecords: 0,
+          currentPage: 0,
+          totalPages: 0,
+          pageSize: 0,
+          data: [],
+        }
+        return res.status(401).json({ success: false, message: message.acc_is_inactive_by_admin, data: obj })
+      }
 
       const { skip, limit: pageLimit } = getPagination(page, limit);
 
@@ -154,6 +165,18 @@ module.exports = {
     try {
       const { user } = req; // logged-in user (employee)
       const employeeId = user._id;
+
+      const userIsActive = await UserModel.findOne({ _id: req.user._id });
+      if (userIsActive.isActive == false) {
+        const obj = {
+          totalRecords: 0,
+          currentPage: 0,
+          totalPages: 0,
+          pageSize: 0,
+          data: [],
+        }
+        return res.status(401).json({ success: false, message: message.acc_is_inactive_by_admin, data: obj })
+      }
 
       const { recruiterId, search, status, city, state, minExperience, maxExperience, minSalary, maxSalary, startDate, endDate, page, limit } = req.query;
       const { skip, limit: pageLimit } = getPagination(page, limit);
@@ -377,6 +400,11 @@ module.exports = {
 
   getJobPostDetail: async (req, res) => {
     try {
+      const userIsActive = await UserModel.findOne({ _id: req.user._id });
+      if (userIsActive.isActive == false) {
+        // return apiResponse.UNAUTHORIZED({ res, message: message.acc_is_inactive_by_admin })
+        return res.status(401).json({ message: message.acc_is_inactive_by_admin, data: {} })
+      }
       const { id } = req.params;
       const popupate = [
         {
@@ -403,6 +431,11 @@ module.exports = {
 
   getJobpostOverviewCount: async (req, res) => {
     try {
+      const userIsActive = await UserModel.findOne({ _id: req.user._id });
+      if (userIsActive.isActive == false) {
+        return apiResponse.UNAUTHORIZED({ res, message: message.acc_is_inactive_by_admin })
+      }
+
       const reqBody = req.query
       const query = { isActive: true, deletedAt: null, paymentStatus: { $ne: JOB_POST_PAYMENT_STATUS.RECRUITER_PAYMENT_PENDING } }
 
@@ -444,13 +477,13 @@ module.exports = {
         res,
         message: "Job post overview count fetched successfully",
         data: {
-          pending: jobCounts.pending ?? 0,
-          hired: jobCounts.hired ?? 0,
-          start: jobCounts.start ?? 0,
-          canceled: jobCounts.canceled ?? 0,
-          completed: jobCounts.completed ?? 0,
-          verified: jobCounts.verified ?? 0,
-          expired: jobCounts.expired ?? 0
+          pending: jobCounts?.pending ?? 0,
+          hired: jobCounts?.hired ?? 0,
+          start: jobCounts?.start ?? 0,
+          canceled: jobCounts?.canceled ?? 0,
+          completed: jobCounts?.completed ?? 0,
+          verified: jobCounts?.verified ?? 0,
+          expired: jobCounts?.expired ?? 0
         }
       });
     } catch (err) {
@@ -544,6 +577,11 @@ module.exports = {
     try {
       const { jobPostId } = req.body;
       const { user } = req;
+
+      const userIsActive = await UserModel.findOne({ _id: user._id });
+      if (userIsActive.isActive == false) {
+        return apiResponse.UNAUTHORIZED({ res, message: message.acc_is_inactive_by_admin, data: {} })
+      }
 
       // Check job exists
       const jobPost = await JobPostModel.findOne({ _id: jobPostId, isActive: true }).populate("recruiterId", "_id name fcmToken");
@@ -848,6 +886,18 @@ module.exports = {
       const { jobPostId, search, minExperience, maxExperience, skill, phone, profession, isActive, startDate, endDate, page, limit, sortField, sortOrder } = req.query;
       const applicantId = req.user._id;
 
+      const userIsActive = await UserModel.findOne({ _id: req.user._id });
+      if (userIsActive.isActive == false) {
+        const obj = {
+          totalRecords: 0,
+          currentPage: 0,
+          totalPages: 0,
+          pageSize: 0,
+          data: [],
+        }
+        return res.status(401).json({ success: false, message: message.acc_is_inactive_by_admin, data: obj })
+      }
+
       const { skip, limit: pageLimit } = getPagination(page, limit);
 
       let filter = [];
@@ -1092,6 +1142,17 @@ module.exports = {
   // view all upcoming jobs for hospital and employee
   viewAllUpcomingJobs: async (req, res) => {
     try {
+      const userIsActive = await UserModel.findOne({ _id: req.user._id });
+      if (userIsActive.isActive == false) {
+        const obj = {
+          totalRecords: 0,
+          currentPage: 0,
+          totalPages: 0,
+          pageSize: 0,
+          data: [],
+        }
+        return res.status(401).json({ success: false, message: message.acc_is_inactive_by_admin, data: obj })
+      }
       const { applicantId, recruiterId, search, city, state, startDate, endDate, page, limit } = req.query;
 
       const { skip, limit: pageLimit } = getPagination(page, limit);
@@ -1162,6 +1223,19 @@ module.exports = {
   // view all ongoing(start) jobs for hospital and employee
   viewAllOngoingJobs: async (req, res) => {
     try {
+
+      const userIsActive = await UserModel.findOne({ _id: req.user._id });
+      if (userIsActive.isActive == false) {
+        const obj = {
+          totalRecords: 0,
+          currentPage: 0,
+          totalPages: 0,
+          pageSize: 0,
+          data: [],
+        }
+        return res.status(401).json({ success: false, message: message.acc_is_inactive_by_admin, data: obj })
+      }
+
       const { applicantId, recruiterId, search, city, state, startDate, endDate, page, limit } = req.query;
 
       const { skip, limit: pageLimit } = getPagination(page, limit);
@@ -1232,6 +1306,17 @@ module.exports = {
   // view all completed jobs for hospital and employee
   viewAllCompletedJobs: async (req, res) => {
     try {
+      const userIsActive = await UserModel.findOne({ _id: req.user._id });
+      if (userIsActive.isActive == false) {
+        const obj = {
+          totalRecords: 0,
+          currentPage: 0,
+          totalPages: 0,
+          pageSize: 0,
+          data: [],
+        }
+        return res.status(401).json({ success: false, message: message.acc_is_inactive_by_admin, data: obj })
+      }
       const { applicantId, recruiterId, search, city, state, startDate, endDate, page, limit } = req.query;
 
       const { skip, limit: pageLimit } = getPagination(page, limit);
@@ -1296,6 +1381,17 @@ module.exports = {
   // view all verified jobs for hospital and employee
   viewAllVerifiedJobs: async (req, res) => {
     try {
+      const userIsActive = await UserModel.findOne({ _id: req.user._id });
+      if (userIsActive.isActive == false) {
+        const obj = {
+          totalRecords: 0,
+          currentPage: 0,
+          totalPages: 0,
+          pageSize: 0,
+          data: [],
+        }
+        return res.status(401).json({ success: false, message: message.acc_is_inactive_by_admin, data: obj })
+      }
       const { applicantId, recruiterId, search, city, state, startDate, endDate, page, limit } = req.query;
 
       const { skip, limit: pageLimit } = getPagination(page, limit);
@@ -1625,6 +1721,19 @@ module.exports = {
   // get job post all status overview count (ongoing, upcoming, completed, expired, verified)
   jobpostStatusOverviewCount: async (req, res) => {
     try {
+      const userIsActive = await UserModel.findOne({ _id: req.user._id });
+      if (userIsActive.isActive == false) {
+        const obj = {
+          pending: 0,
+          hired: 0,
+          start: 0,
+          canceled: 0,
+          completed: 0,
+          verified: 0,
+          expired: 0
+        }
+        return res.status(401).json({ success: false, message: message.acc_is_inactive_by_admin, data: obj })
+      }
       const { applicantId, recruiterId } = req.query;
 
       let filterArr = [{ deletedAt: null, isActive: true }];
@@ -1673,6 +1782,11 @@ module.exports = {
       const id = req.params.jobPostId;
       const { user } = req;
 
+      const userIsActive = await UserModel.findOne({ _id: user._id });
+      if (userIsActive.isActive == false) {
+        return apiResponse.UNAUTHORIZED({ res, message: message.acc_is_inactive_by_admin })
+      }
+
       const job = await JobPostModel.findOne({ _id: id }).populate("recruiterId", "_id name fcmToken").lean();
       if (!job) return apiResponse.NOT_FOUND({ res, message: message.job_post_not_found });
       if (job.hiredApplicantId != user._id.toString()) return apiResponse.UNAUTHORIZED({ res, message: message.you_not_hired_for_job });
@@ -1700,6 +1814,11 @@ module.exports = {
     try {
       const id = req.params.jobPostId;
       const { user } = req;
+
+      const userIsActive = await UserModel.findOne({ _id: user._id });
+      if (userIsActive.isActive == false) {
+        return apiResponse.UNAUTHORIZED({ res, message: message.acc_is_inactive_by_admin, data: {} })
+      }
 
       const job = await JobPostModel.findOne({ _id: id }).populate("recruiterId", "_id name fcmToken").lean();
       if (!job) return apiResponse.NOT_FOUND({ res, message: message.job_post_not_found });

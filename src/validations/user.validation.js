@@ -1,5 +1,12 @@
 const Joi = require("joi");
-const { ROLE, APPLICATION_STATUS } = require("../utils/constant");
+const { ROLE } = require("../utils/constant");
+
+const objectId = (label = "id") =>
+  Joi.string().trim().length(24).hex().label(label).messages({
+    "string.base": "{#label} must be a string",
+    "string.length": "{#label} must be 24 characters long",
+    "string.hex": "{#label} must contain only hexadecimal characters",
+  });
 
 const bankDetailValidation = Joi.object({
   bankName: Joi.string().trim().lowercase().required().messages({
@@ -97,6 +104,12 @@ const setCommissionPercentage = {
   }),
 };
 
+const activeInactiveUser = {
+  params: Joi.object().keys({
+    id: objectId().required(),
+  }),
+};
+
 const editProfile = {
   body: Joi.object({
     name: Joi.string().trim().lowercase().optional(),
@@ -181,6 +194,7 @@ module.exports = {
   verifyOtp,
   changePassword,
   setCommissionPercentage,
+  activeInactiveUser,
   getAllUser,
   adminLogin,
 };

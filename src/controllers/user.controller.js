@@ -246,19 +246,20 @@ module.exports = {
     try {
       const { phone } = req.body;
 
+      const userHasPermission = await UserModel.findOne({ phone: phone })
+      if (userHasPermission && userHasPermission.isActive == false) {
+        return apiResponse.UNAUTHORIZED({ res, message: message.acc_is_inactive_by_admin })
+      }
+
       let otp = Math.floor(1000 + Math.random() * 9000);
       otp = otp || "0000";
 
       const sendOtpTOPhone = await msg91Services.sendOTP(phone, otp)
-      console.log(sendOtpTOPhone,'------------------ sendOtpTOPhone 1')
-      
+
       if (sendOtpTOPhone.type === "success") {
-        console.log('------------------ 2')
         await OtpModel.findOneAndUpdate({ phone }, { otp: otp, expiryTime: new Date(Date.now() + 1 * 60 * 1000) }, { upsert: true, new: true })
-        console.log('------------------ 3')
         return apiResponse.OK({ res, message: message.otp_sent_phone });
       } else {
-        console.log('------------------ 4')
         return apiResponse.NOT_ACCEPTABLE({ res, message: sendOtpTOPhone.message || message.otp_sending_failed });
       }
 
@@ -273,8 +274,12 @@ module.exports = {
 
   verifyOtp: async (req, res) => {
     try {
-      console.log('verifyOtp ---------------------1')
       const { phone, otp, fcmToken } = req.body;
+
+      const userHasPermission = await UserModel.findOne({ phone: phone })
+      if (userHasPermission && userHasPermission.isActive == false) {
+        return apiResponse.UNAUTHORIZED({ res, message: message.acc_is_inactive_by_admin })
+      }
 
       const msg91OtpVerification = await msg91Services.verifyMsg91Otp(phone, otp)
       if (msg91OtpVerification.type === 'success') {
@@ -293,7 +298,7 @@ module.exports = {
         }
         return apiResponse.OK({ res, message: message.otp_verified, data: user });
       } else if (msg91OtpVerification.type === 'error') {
-        return apiResponse.NOT_ACCEPTABLE({ res, message: message.msg91OtpVerification.message || message.otp_verification_issue });
+        return apiResponse.NOT_ACCEPTABLE({ res, message: message?.msg91OtpVerification?.message || message.otp_verification_issue });
       }
 
       // const otpData = await OtpModel.findOne({ phone });
@@ -316,7 +321,6 @@ module.exports = {
       //   await UserModel.findByIdAndUpdate(user._id, { fcmToken: fcmToken })
       // }
 
-      console.log('verifyOtp ---------------------2')
       return apiResponse.OK({ res, message: message.otp_verified, data: user });
     } catch (err) {
       console.log(err);
@@ -360,7 +364,6 @@ module.exports = {
   editProfile: async (req, res) => {
     try {
       const reqBody = req.body;
-      console.log(reqBody, '------------------reqBody')
       const id = req.user._id;
 
       // phone not change
@@ -388,6 +391,31 @@ module.exports = {
     } catch (err) {
       console.log(err);
       return apiResponse.CATCH_ERROR({ res, message: message.something_went_wrong });
+    }
+  },
+
+  activeInactiveUser: async (req, res) => {
+    try {
+      const id = req.params.id;
+
+      // Find user first
+      const user = await UserModel.findOne({ _id: id, deletedAt: null });
+
+      if (!user) return apiResponse.NOT_FOUND({ res, message: message.user_not_found, });
+
+      // Toggle isActive value
+      user.isActive = !user.isActive;
+
+      await user.save();
+
+      return apiResponse.OK({
+        res,
+        message: `User ${user.isActive ? "activated" : "deactivated"} successfully`,
+        data: user,
+      });
+    } catch (err) {
+      console.log(err);
+      return apiResponse.CATCH_ERROR({ res, message: message.something_went_wrong, });
     }
   },
 

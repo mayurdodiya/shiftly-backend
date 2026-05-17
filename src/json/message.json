@@ -88,5 +88,6 @@
   "payment_link": "Payment link generated successfully.",
   "payment_not_found": "Payment data not found.",
   "payment_pending": "Payment is not completed.",
-  "payment_already_exist": "Payment is already exist."
+  "payment_already_exist": "Payment is already exist.",
+  "acc_is_inactive_by_admin": "Your account has been restricted by admin. Please contact: amithven95@gmail.com."
 }
